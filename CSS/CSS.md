@@ -1,5 +1,7 @@
 
 
+ 
+
 ### 特性
 
 ```css
@@ -106,6 +108,17 @@ CSS3.x: 实现更丰富和更复杂的网页
 未定义行为：
      相同的 CSS 语言， 在不同浏览器具有不同表现时， 具体原因浏览器未定义这种行为，导致在
   一种浏览器中行为按照预计期望， 另一种未发生此种行为。
+
+12 两端对齐
+
+13 右对齐
+
+14 垂直对齐： 垂直表明方向， 即元素在垂直方向上基于什么进行摆放。
+    a. 垂直居中对齐： 元素上下留白相同，位居于父元素容器中心。 
+    
+ 
+15.等高布局
+
 
 
 ```
@@ -366,11 +379,19 @@ height：100%问题
       1                  2
 1. 内容区域: 元素自身，即文本中的背景色区域    2
 2. 内联盒子：元素的外在盒子与其并列的块级盒子，其决定不让元素按块布局而是排成一行 2
-3. 行框盒子： 每一行都是一个行框盒子， 每行上的一个有一个内联盒子组成了行框盒子  2
-4. 包含盒子：<p>标签就是一个包含盒子， 此盒子由一行一行的行框盒子组成。        1
+3. 行框盒子： 每一行都是一个行框盒子， 每行上的一个个内联盒子组成了行框盒子      2
+4. 包含盒子：<p>标签就是一个包含盒子， 此盒子由一行一行的行框盒子组成。         1
 
 幽灵空白节点：HTML5 的所有内联元素的解析和渲染表现的像其之前有一个空白节点。
+行框盒子的高度由内部最大的内联和子高度决定。
 ```
+
+```
+
+  
+```
+
+
 
 ### 块级元素列表
 
@@ -683,6 +704,33 @@ auto, 是否会超出层叠区。
     }
 
 4. 滚动容器底部留白使用 margin-bootom 可在各样浏览器下完成功能。
+
+5. margin 合并
+   ： 块级元素的上外表距与下外边距有时会合并为单个外边距
+   特点： 只发生在块级元素， 不包括浮动和绝对定位元素(他们也可以让元素块状化)
+   发生场景： 
+       a. 相邻兄弟元素 margin 合并
+       b. 父级和第一个/最后一个子元素
+   
+   针对 b 解决办法：
+     针对 margin-top 合并
+       i.  父元素设置为块状格式上下文元素
+       ii. 父元素设置border-top值
+       iii. 父元素设置 padding-top 值
+       iiii. 父元素和第一个子元素之间添加内联元素进行分割
+     针对 margin-bottom 合并
+         i. 父元素设置为块状格式上下文元素
+        ii. 父元素设置border-bottom值
+        iii. 父元素设置 padding-bottom 值
+        iiii. 父元素和最后一个子元素之间添加内联元素
+     
+     margin 合并原则： 正正取最大值 正负取相加 负负取最负 
+```
+
+#### border
+
+```
+
 ```
 
 
@@ -719,9 +767,503 @@ d. line-height 值等于 内容区+上下边界
 
 ```
 
-​           
+```css
+1. 英文字母x--- 决定基线
+  
+  基线 (baseline) 应用于垂直方向的排版或者对齐。 
+       a. line-height 行高定义为两基线的间距。
+       b. vertical-align 默认值是基线
+       c. 内联元素默认是基线对齐
+  
+  基线被定义为字母 x 的下边缘
+  
+  x-height: 小写字母x的高度
+       vertical-align： middle，元素垂直对齐的方式是基线+1/2x-height高度。
+  
+  ex: 指的是小写字母x的高度， 数值上等于 x-height， 应用价值在于实现垂直居中对齐
+     icon-arrow { 
+         display: inline-block; 
+         width: 20px; 
+         height: 1ex;   // 利用内联元素默认是基线对齐这一特性
+         background: url(arrow.png) no-repeat center; 
+     }
 
-     ### 常用CSS属性
+2. 内联元素的基石line-height
+
+   1. <div> 的高度由哪个css决定 是font-size 还是 line-height？
+            答案： line-height
+   2. 在内联元素中， 非替换元素的可视高度完全由 line-hegiht 决定。
+   3. 内联元素的高度由固定高度和不固定高度组成： 文字高度 + 行距
+   4. 宋体的 em-box 和 内容区域是等同的。
+   5. 替换元素的尺寸不受行高影响，行高只能影响替换元素生成行框盒子时前面的空白幽灵节点
+      的高度。
+            .box { 
+                 line-height: 256px; 
+                } 
+            <div class="box"> 
+            <img src="1.jpg" height="128"> 
+            </div>
+      虽然div的高度是256， 但是图片的高度依然是设置的128， 256是作用在了前面的幽灵空白节点上。
+   6. 对于图片和文本混合的行， line-hieght 只能决定最小高度。
+   7. 对于块级元素， line-height没有作用， 在平常开发块级区域发生视觉变化是因为内联元素的高度改变从而实现的。
+   8. line-height 实现近似的垂直居中： 主要是利用行距上下等分的原则，近似是由于文字字形的垂直中线位置要比生成的真正的行框盒子中线位置低， 但是由于一般字体大小较小误差在1px左右因此肉眼看不出来
+         .title { 
+             line-height: 24px; 
+            }
+       多行文同时需要借助 vertical-align改变默认的基于基线的对齐方式.
+        <div class="box"> 
+             <div class="content">基于行高实现的...</div> 
+        </div>
+       .box { 
+         line-height: 120px; 
+         background-color: #f0f3f9; 
+        } 
+        .content { 
+         display: inline-block; 
+         line-height: 20px; 
+         margin: 0 20px; 
+         vertical-align: middle; 
+        } 
+     注释: content 选择器将div标签转化成 incline-block 这样设置line-height 可通过影响幽灵空白节点高度而决定子元素的行高. 
+
+   9. line-height 的各种值：
+        a. 数值： line-height：1.5  终值是和当前 font-size 值相乘后的值。
+        b. 百分比： line-height：150% 终值是和当前 font-szie 值相乘后的值
+        c. 长度值： line-height： 21px / line-height: 1.5em
+  
+   子元素在发生继承的时候， 对于b/c继承的是终值计算之后的值， 因此若子元素的字体过大则会排版混乱
+但是对于a 来说继承的是line-height：1.5 因此可自适应子元素字体大小。
+   在实际开发中我们也可以使用：
+        * {
+            line-height:150%   // 也可以实现 数值的效果
+         }
+    为什么在body下使用数值的line-height， 因为很多替换元素有自己的默认值，而继承是最弱的权重，因此通过通配符的方式重置默认属性。 
+    或者使用下述方式：
+                 body { 
+                     line-height: 1.5;
+                  }
+                button，input{
+                    line-height:inherit;
+                }
+
+     10. line-height 的大值特性
+                     .box { 
+                         line-height: 96px; 
+                        } 
+                      .box span { 
+                         line-height: 20px; 
+                       }
+
+                       .box { 
+                         line-height: 20px; 
+                        } 
+                        .box span { 
+                         line-height: 96px; 
+                       }
+                  两个 box 的高度分别是多少：  全都是96px！
+        结论： 无论内联元素的 line-height 如何设置最终父级元素是由数值较大的 line-height 
+              决定。
+        原因： <span>是一个内联元素， 自身是一个内联盒子， 内联盒子外被包裹一层行框盒子， 行框
+              盒子前有一个宽度为 0 的空白节点。行框盒子的高度由最大的内联盒子高度决定。因 
+              此.box的高度都为96px。
+   
+3. line-height 的同伴 vertical-align
+       ：凡是 line-height 起作用的地方 vertical-align 也一定起作用。
+   问题A
+        <div class="box"> 
+         <span>文字</span> 
+        </div>
+       .box { line-height: 32px; } 
+       .box > span { font-size: 24px; } 
+      问题： box 的高度是多少？   答案： >32px 因为有 vertical-align 起作用
+ 
+    1. vertical-align 家族
+       a. 线类： baseline、 top、 middle、 bottom
+       b. 文本类： text-top、 text-bottom
+       c. 上标下标类： sub、 super
+       d. 数值百分比类： 20px、 2em、 20%
+    i. vertical-align 的计算值是正值则往上偏移， 如果是负值则往下偏移。
+   ii. 使用 vertical-align 的数值计算有很好的浏览器兼容性。
+  iii. vertical-align 的数值相对于 line-height 计算
+  
+   2. vertical-align 只能作用于display:incline、incline-block
+      incline-table table-cell
+    注： 在table-cell中设置的 vertical-align 其内部子元素会完成垂直居中，但是它作用的
+         不是子元素而是其自身， 因此其内部是块级元素同样可以有垂直对齐效果。
+
+4. 分析问题A的原因， 由于line-height 声明的是32 因此子元素行高确实是32，但是由于前置
+   的幽灵空白符号字体大小和子元素字体大小不匹配， 子元素字体大于幽灵空白符字体因此在实现
+   基线对齐时，大字符的基线更靠下，幽灵字符需要向下移动，从而超过了行高。
+                          解决方式在.box中声明相同字体大小。
+
+   产生间隙的三大原因： 空白字符的产生、 vertical-align基线对齐、 line-height 产生间距。
+                    在发生对齐的过程中产生了间隙。
+     图片底部空白间隙问题：  
+                       .box { 
+                         width: 280px; 
+                         outline: 1px solid #aaa; 
+                         text-align: center; 
+                        } 
+                        .box > img { 
+                         height: 96px; 
+                        }
+    解决：  图片块状化 ： 消灭空白字符
+           line-height：0   消除间距
+           vertical-align 换用其他对齐方式
+           font-szie=0；  基线和中线会重合到一起。
+    
+    margin 失效问题： 图片不会完全移出容器
+            <div class="box"> 
+                 <img src="mm1.jpg"> 
+            </div> 
+                .box > img { 
+                 height: 96px;  
+                 margin-top: -200px; 
+              }
+    原因： 同样是幽灵空白节点的问题， 内联元素如果不是主动触发位移不会跑到计算容器之外
+          空白字符通过基线对齐方式将图片的下边缘限制在底部。
+
+5 深入理解 vertical-align 线性类属性 
+   
+  1). inline-block 与 baseline
+    a. vertical-align 属性的默认值 baseline 
+       i.  文本之类的内联元素那里就是字符 x 的下边缘.
+      ii.  替换元素则是替换元素的下边缘。
+      iii. inline-block 元素：一个 inline-block 元素，如果里面没有内联元素，或者                  overflow 不是 visible，则该元素的基线就是其 margin 底边缘；否则其基线就是元 
+         素里面最后一行内联元素的基线。
+    
+```
+
+### 流的破坏和保护
+
+#### float
+
+```css
+前言：float 属性的原本作用“只是为了实现文字环绕效果”
+
+作者观点： 无宽度， 无浮动
+
+float 属性： 
+      a. 包裹性 ：自动将浮动元素宽度收缩为合适的子元素宽度大小。
+      b. 块状化并格式化上下文
+      c. 破坏文档流
+      d. 没有任何 margin 合并
+      
+float 发生环绕作用机制
+      a. 高度塌陷
+      b. 行框盒子和浮动元素的不可重叠性。即使margin-left：-100 也不可以改变。
+   高度塌陷： 父元素在不设置高度的前提下， 子元素为float时，该子元素的高度不计入
+            父元素高度下。
+ 
+float 发射环绕作用机制两个细节：
+      a. 浮动锚点： float 元素所在流中的一个点，该点本身不浮动。表现而言像
+                  一个没有margin、 border、 padding 的空白元素。
+      b. 浮动参考:  浮动元素对齐参考的实体。 其参考实体是行框盒子。
+      
+float 实现两栏布局： 核心在于第二栏设置 marigin-left
+      .prev { 
+         float: left; 
+       } 
+      .next { 
+         float: right; 
+       } 
+      .title { 
+         margin: 0 70px; 
+         text-align: center; 
+       }
+
+```
+
+#### BFC
+
+```
+block formatting context： 块级格式化上下文
+
+特性： 
+       1. 一个元素具有 BFC 内部子元素不会影响带外部元素。 
+       2. 实现健壮、 智能的自适应布局。自动填满容器
+    
+    延伸： 根据第一条，BFC 元素不
+          会发生 margin 重叠， 重叠是会影响外部元素的。
+       2. BFC 可以清楚子元素浮动， 因为父元素一旦高度塌陷则会影响到后面的
+          布局。
+触发 BFC：
+       1. <html> 根元素
+       2. float 值不为 none
+       3. overflow 的值为 auto、scroll或 hidden
+       4. display 的值为table-cell、table-caption 和 inline-block 中的任何一个
+       5. position 的值不为 relative 和 static。
+       
+
+float 不为none：float 元素本身的破坏性格包裹性，使元素自身失去了流动性无法                用于实现自动填满容器的自适应布局。
+position：absolute， 脱离文档流严重， 无实现自动的填满容器自适应布局。
+overflow：hidden， 其本身是普通元素，块状元素流体性保持完善。
+display：inline-block 会让元素尺寸包裹收缩， 同样失去流动性。
+
+
+BFC 声明中能够适应自适应的是以下属性：
+    a. overflow: auto/hidden 适应于IE7
+    b. display:inline-block  适用于IE6和IE7
+    c. display:table-cell    IE8及以上浏览器
+```
+
+#### overflow
+
+```css
+彻底清除浮动影响的最佳元素。
+
+overflow: hidden,彻底清除浮动， 本质上是利用 overflow元素的 BFC 特需特性。
+
+overflow：hidden 的本职工作是剪裁。当声明 overflow 的元素具备 padding 和 border， 子元素超出范围， 剪裁到border box 内边界进行。
+
+overflow-x: visible（默认） | hidden | scroll | auto
+
+overflow-y: visible（默认） | hidden | scroll | auto
+
+如果 overflow-x 和 overflow-y 属性中的一个值设置为 visible 而另
+外一个设置为 scroll、auto 或 hidden，则 visible 的样式表现会如同 auto。
+
+
+overflow 与 滚动条：
+   a.IE7 浏览器 html 标签 和 body 标签 默认有滚动条
+   b.IE8 浏览器 html 标签 和 body 标签 默认是 auto
+     有如下规则： 在 PC 端，无论是什么浏览器，默认滚动条均来自<html>，而不是<body>标签。
+      去除页面默认滚动条使用： overflow：hidden
+   c. 滚动条会占用容器的可用宽度或高度, IE7 及以上版本 IE、Chrome、   
+      Firefox浏览器滚动栏所占据的宽度均是17px.
+ 
+滚动条的宽度产生的糟糕效果：
+      1. float 布局若宽度定死， 产生滚动条后会发生错位。
+      2. 滚动栏占据宽度的特性最大的问题就是页面加载的时候水平居中的布局可能 
+         会产生晃动，因为窗体默认是没有滚动条的，而 HTML 内容是自上而下加 
+         载的，就会发生一开始没有滚动条，后来突然出现滚动条的情况，此时页面 
+         的可用宽度发生变化，水平居中重新计算，导致页面发生晃动。
+    简单的做法是：
+                html { 
+                   overflow-y: scroll; 
+                  }
+    第二种做法：
+                html { 
+                 overflow-y: scroll; /* for IE8 */ 
+                } 
+                :root { 
+                 overflow-y: auto; 
+                 overflow-x: hidden; 
+                } 
+                :root body { 
+                 position: absolute; 
+                } 
+                body { 
+                 width: 100vw; 
+                 overflow: hidden; 
+                }
+  
+  
+依赖overflow的样式： 该样式的成立需要依赖 overflow 的声明
+    单行文字溢出打点显示：
+                 .ell { 
+                     text-overflow: ellipsis; 
+                     white-space: nowrap; 
+                     overflow: hidden; 
+                  }
+    上述三条声明缺一不可
+    
+
+overflow 与锚点定位
+      a. <a href="#1">发展历程></a>    利用 href 属性和 name 属性
+         <a name="1"></a>
+      b. <a href="#1">发展历程></a> 
+         <h2 id="1">发展历程</h2>      利用 href 属性和 id 属性
+         
+ 两种触发锚点定位行为的发生：
+  （1）URL 地址中的锚链与锚点元素对应并有交互行为；
+  （2）可 focus 的锚点元素处于 focus 状态。
+   (3) 锚链值是非隐藏状态。
+   (4) 链接中会加入 #xxx ,可通过 location.hash 自动获取。
+   (5) 只发生在有滚动条的页面中
+               
+   <a href="#">返回顶部></a>
+   
+   “focus 锚点定位”指的是类似链接或者按钮、输入框等可以被 focus 的元素在被 focus时发生的页面重定位现象。
+   
+ focus 和 url 定位的差异：
+    “URL 地址锚链定位”是让元素定位在浏览器窗体的上边缘，而“focus 锚点定位”是让元素在浏览器窗体范围内显示即可，不一定是在上边缘。
+    
+  锚点定位作用的本质：锚点定位本质上是改变了 scrollTop 或scrollLeft 值
+  
+    a. 改变[容器]的滚动高度和滚动宽度实现，定位行为是由内而外。  (是容器并非是浏览器)
+    b. “由内而外”指的是，普通元素和窗体同时可滚动的时候，会由内而外触发所有可滚动窗体的锚点定位行为. 容器元素 - 浏览器
+    c. overflow:hidden 也可以触发滚动条高度变化， 即没有滚动条但是可以
+       发生锚点定位。    利用 c 可以实现 选项卡切换。
+             <div class="box">                   // 锚点
+             <div class="list" id="one">1</div> 
+             <div class="list" id="two">2</div> 
+             <div class="list" id="three">3</div> 
+             <div class="list" id="four">4</div> 
+            </div> 
+            <div class="link">                  // 锚链
+             <a href="#one">1</a> 
+             <a href="#two">2</a> 
+             <a href="#three">3</a> 
+             <a href="#four">4</a> 
+            </div> 
+            .box { 
+             height: 10em; 
+             border: 1px solid #ddd; 
+             overflow: hidden; 
+            } 
+            .list { 
+             line-height: 10em; 
+             background: #ddd; 
+            } 
+      缺点1：  容器需要实现固定高度
+      缺点2：  “由内而外”导致浏览器也会跟着发生震动
+
+针对缺点2： 利用 focus 
+         <div class="box"> 
+         <div class="list"><input id="one">1</div> 
+         <div class="list"><input id="two">2</div> 
+         <div class="list"><input id="three">3</div> 
+         <div class="list"><input id="four">4</div> 
+        </div> 
+        <div class="link"> 
+         <label class="click" for="one">1</label> 
+         <label class="click" for="two">2</label> 
+         <label class="click" for="three">3</label> 
+         <label class="click" for="four">4</label> 
+        </div> 
+        .box { 
+         height: 10em; 
+         border: 1px solid #ddd; 
+         overflow: hidden; 
+        } 
+        .list { 
+         height: 100%; 
+         background: #ddd; 
+         position: relative; 
+        } 
+        .list > input { 
+         position: absolute; top:0; 
+         height: 100%; width: 1px; 
+         border:0; padding: 0; margin: 0; 
+         clip: rect(0 0 0 0); 
+        }
+```
+
+#### position:absolute
+
+```css
+absolute： 包裹性、 块状性、 破坏性
+
+1. absolute 和 float 同时存在的时候，float属性无任何效果的
+
+2. 元素一旦 position 属性值为 absolute 或 fixed，其display 计算值就是 block 或者 table
+
+3. absolute 的包含块：
+   a. 包含块： 元素用于计算自身宽度和高度的参考块，普通元素的包含块是其父元素。
+   b: 元素的包含块由其 position 定义
+     i: 根元素（很多场景下可以看成是<html>）被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
+     ii: 如果该元素的 position 是 relative 或者 static，则“包含块”
+由其最近的块容器祖先盒的 content box 边界形成。
+     iii:如果元素 position:fixed，则“包含块”是“初始包含块”。
+     IV:如果元素 position:absolute，则“包含块”由最近的 position 不为 static的祖先元素建立，边界是 padding box 具体方式如下:
+       (1) 假设给内联元素的前后各生成一个宽度为 0 的内联盒子（inline box），则这两个内联盒子的 padding box 外面的包围盒就是内联元素的“包含块”；
+       (2) 如果该内联元素被跨行分割了，那么“包含块”是未定义的，也就是 CSS2.1规范并没有明确定义，浏览器自行发挥。
+       否则，“包含块”由该祖先的 padding box 边界形成。
+           
+     V：如果没有符合条件的祖先元素，则“包含块”是“初始包含块”。
+    
+     内联元素的“包含块”是由“生成的”前后内联盒子决定的，与里面的内联盒子细节没有任何关系。
+     
+4. 绝对定位元素的包裹性是相对于包含块来表现的。
+     .container { 
+         width: 200px; 
+         border: 1px solid; 
+         position: relative; 
+        } 
+     .box { position: absolute; }
+   a. box 的最大宽度默认为其父元素宽度， 文字超过了会发生换行。这是包裹性带来的宽度自适应性。
+   b. .container 高度塌陷是因为 absolute 破坏了正常的 CSS 流，此乃“破坏性”
+ 
+5. 为何绝对定位的定位要相对于 padding box 呢？
+   a. 与 padding box 解耦， 当在边框右上角放上小的图标， 改变 padding 值不会使图标发生移动， 而若基于 content box 定位改变 paddong 图标下移
+。
+
+6. 具有相对特性的无依赖 absolute 定位
+   a. 当元素 position：absolute 时， 元素是相对定位，即当前位置是其position: static 位置。(在不设置top/left/right/bottom)下
+      注意：  这是css初始化 absolute 规则，即当父元素没有声明 relative
+时， 子元素仅仅是一个 absolute top的初始值是： 浏览器下编缘长度 至 父元素padding下边缘长度，行为表现跟相对定位一样。 当父元素设置 relative 此时 top初始化为 padding box 的长度。  
+
+   b. 不占据 css 尺寸空间， 即后面跟着内联元素会与其重叠。
+
+7 absolute 与 text-align
+  a. text-align 只对内联元素起作用。
+
+  b. 父元素设置 text-align 可以对子元素是内联元素position:absolute
+     产生效果， 因为其本质上是对前面的幽灵空白符号产生作用。 此时子元素
+     设置 margin-left:-50% 即可完成居中效果
+
+8 absoliut 与 overflow
+  a.  如果 overflow 不是定位元素，同时绝对定位元素和 overflow 容器之间也没有定位元素，则 overflow 无法对 absolute 元素进行剪裁。 
+  b.  a 原则下overflow 元素父级是定位元素也不会剪裁 。
+  c.  如果 overflow 元素和绝对定位元素之间有定位元素，会被剪裁.即将绝对定位元素限制在了overflow 所在的区域中。
+  d. 如果 overflow 的属性值不是 hidden 而是 auto 或者 scroll，即使绝对定位元素高宽比 overflow 元素高宽还要大，也都不会出现滚动条。
+      当绝对定位和非绝对定位混合在一起时特殊现象：即当容器滚动的时候，绝对定位元素纹丝不动，不跟着滚动，表现类似 fixed 固定定位。  该特性可应用于文字的背景图片。
+   e. 由于 position:fixed 固定定位元素的包含块是根元素，因此，除非是窗体滚动，否则上面讨论的所有 overflow 剪裁规则对固定定位都不适用。
+
+  e. css3 世界带来某些规则的改变， transform 属性有不完全的定位属性
+     i overflow 元素自身 transform： • IE9 及以上版本浏览器、            • Firefox 和 Safari（OS X、iOS）剪裁；
+       • Chrome 和 Opera 不剪裁。
+  
+    ii. overflow 子元素 transform： • IE9 及以上版本浏览器、     
+        •  Firefox 和 Safari（OS X、iOS）剪裁；
+        • Chrome 和 Opera 剪裁。
+  
+
+9. absolute 与 clip
+   前言：CSS 世界有些属性或者特性必须和其他属性一起使用在有效。 clip 是裁剪属性. clip 是专门实现脱离文档流的剪裁。
+   a. clip 属性要想起作用，元素必须是绝对定位或者固定定位.
+   b. clip: rect(top right bottom left)
+   c. 两种场景 clip 的不可替代性：
+      i. fixed 固定定位的剪裁。 overflow 无法进行裁剪。
+
+      ii. 最佳可访问性： 肉眼看不见，但是其他辅助设备却能够进行识别
+和访问的隐藏。
+    e.g: 很多网站左上角都有包含自己网站名称的标识（logo），而这些标识一般都是图片，为了更好地 SEO 以及无障碍识别，我们一般会使用<h1>标签写上网站的名称。
+        下策：display:none 或者 visibility:hidden 隐藏屏幕阅读 
+             设备会忽略这里的文字。
+        中策：text-indent 缩进是中策，但文字如果缩进过大，大到屏幕之
+             外，屏幕阅读设备也是不会读取的。
+        上策： color:transparent 是移动端上策，但却是桌面端中策，因为原生 IE8 浏览器并不支持它。color:transparent 声明，很难用简单的方式阻止文本被框选
+        最佳隐藏策略：clip 剪裁隐藏既满足视觉上的隐藏，屏幕阅读设备等辅助设备也支持得很好。
+                    .clip { 
+                         position: absolute; 
+                         clip: rect(0 0 0 0); 
+                     }
+  clip 隐藏仅仅是决定了哪部分是可见的，非可见部分无法响应点击事件
+等；然后，虽然视觉上隐藏，但是元素的尺寸依然是原本的尺寸，在 IE 浏览器和 Firefox 浏览器下抹掉了不可见区域尺寸对布局的影响，Chrome 浏览器却保留了。
+     
+10 absolute 的流体特性
+    a. 仅仅设置一个方向： 元素的另外方向的流体特性依然保留。
+
+    b. 若同时声明left=0 和 right=0 则 absolute 发生流体特性会自动        化上下文。此时子元素宽度 = 父元素padding box宽度 + content        box 宽度。
+
+11 absolut 和 margin：auto
+   a. 绝对定位元素的 margin:auto 的填充规则和普通流体元素的一模一样
+    • 如果一侧定值，一侧 auto，auto 为剩余空间大小；
+    • 如果两侧均是 auto，则平分剩余空间。
+    实现垂直居中：
+      .element { 
+             width: 300px; height: 200px; 
+             position: absolute; 
+             left: 0; right: 0; top: 0; bottom: 0; 
+             margin: auto; 
+        }
+```
+
+
+
+ ### 常用CSS属性
 
 ```css
 white-space:
@@ -739,5 +1281,67 @@ clip：
 
 bcakground-clip： 
 
+word-break: break-all;   // 连续英文字符换行
+
+```
+
+### CSS注意事项
+
+```css
+1. 即 Chrome 浏览器下，如果容器可滚动（假设是垂直滚动），则 padding-bottom 也算在滚动尺寸之内，IE 和 Firefox 浏览器
+忽略 padding-bottom。
+
+2.  <a href="javascript:" class="icon-delete tips" data-title="删除">删除</a>
+     .tips[data-title] {
+        position: relative;
+     }
+    .tips[data-title]::before,
+    .tips[data-title]::after {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      visibility: hidden; 
+    }
+    .tips[data-title]::before {
+      content: attr(data-title);
+      top: -33px;
+      padding: 2px 10px 3px;
+      line-height: 18px;
+      border-radius: 2px;
+      background-color: #333;
+      text-align: left;
+      color: #fff;
+      font-size: 12px;
+    }
+    .tips[data-title]::after {
+      content: "";
+      border: 6px solid transparent;
+      border-top-color: #333;
+      top: -10px;
+    }
+    .tips[data-title]:hover::before,
+    .tips[data-title]:hover::after {
+      transition: visibility .1s .1s;
+      visibility: visible;
+    }
+
+    .icon-delete {
+      display: inline-block;
+      width: 20px; height: 20px;
+     // background: url(/images/6/delete.png) no-repeat center;
+      background-size: 16px;
+    }
+这段代码实现;   删除[链接] 点击删除显示黑色指示框 黑色指示框包含文字删除
+              黑色指示框利用::before 生成  下三角使用 ::after实现
+              精确定位将::before，::after定位方式修改： absulte
+              .tips[data-title] 为positive 定位
+初始生成：  矩形框+文字  删除  三角框     这三个都在<a> </a> 标签中
+           ::befor :: after {position:absolute
+                             left:50%     两矩形挪到一起
+                             transition: transformX(-50%)
+                                          第一个矩形框移动自身宽度一
+                                          半， 使得小矩形在其中间
+                             visibility：hidden  隐藏
+                             }
 ```
 
