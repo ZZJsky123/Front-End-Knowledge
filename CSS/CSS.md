@@ -1,5 +1,3 @@
-
-
  
 
 ### 特性
@@ -7,11 +5,23 @@
 ```css
 CSS 本身注重的是特性间的【相互联系】和【具象】能力， 对于逻辑要求较低。
 
-【属性】 CSS 是魔法师， 【标签】即 HTML 是魔法石. 【操作系统】是它们所在的世界。【平行世界】： Windows世界、OSX 世界，移动端的 ios 世界 和
-Andriod 世界。
+【属性】 CSS 是魔法师， 【标签】即 HTML 是魔法石. 【操作系统】是它们所在的世界。【平行世界】： Windows世界、OSX 世界，移动端的 ios 世界 和Andriod 世界。
 
-注： windows 世界中 IE区域活跃， Safari地区较为落寞
-      OSX 世界中， IE区域不存在， Safari是最活跃的地区
+HTML 标签提供文档元素： 文字、 图片、 列表、 表格、 按钮，内容布局。 标签具备基本的 HTML 属性。 布局依靠标签自身的块级和内联级性质。  魔法石基体是标签名， 内容是石头刻的内容。
+ 
+CSS 标签提供文档元素样式， [通过向便签提供选择器]，将样式添加到对应的内容上。 其中 CSS 中的伪类
+和伪元素可以分别对选择器添加样式、 生成相应的元素。
+
+1. 魔法石遵循的世界基本规则：流
+2. 魔法石自身是： margin border padding 内容 带有宽度的空心四个盒子
+3. 魔法石自身内容是： em框、 内容区、 行内框、 行框、符号盒子。 由字体大小/行间距决定的四个盒子 
+4. css 提供： 操控魔法石盒子尺寸、 操控内容盒子尺寸 、 提供块级格式化上下文、 提供层叠上下文
+             操控内容样式 其它样式： 定位样式、 结构布局、 动画、 隐藏。
+5. css 眼中的魔法石种类： 块级、 内联级(替换 和 非替换)
+6. 块级元素嵌套块级元素、 块级元素嵌套内联元素、 块级元素嵌套定位元素：
+       问题1; 父元素的流体特性什么时候会被破坏
+       问题2： 
+
 
 《CSS 世界》 中规定
      元素尺寸： border box尺寸      原生的DOM API写作： offsetHeight/offsetWidth
@@ -115,12 +125,8 @@ CSS3.x: 实现更丰富和更复杂的网页
 
 14 垂直对齐： 垂直表明方向， 即元素在垂直方向上基于什么进行摆放。
     a. 垂直居中对齐： 元素上下留白相同，位居于父元素容器中心。 
-    
  
 15.等高布局
-
-
-
 ```
 
 ### Block & inline
@@ -180,9 +186,10 @@ width/height 基本特点
 width/height 的具体作用细节：
 
 width：auto 下的四种宽度表现：
-     1. 充分利用可用空间： 在<div>、 <p> 元素下宽度默认是100%   [fill-avaliable]
+     1. 充分利用可用空间： 在<div>、 <p> 元素下宽度默认是100%于父级容器   [fill-avaliable]
      2. 收缩与包裹： 元素设置为浮动、 绝对定位、 inline-block 元素或者 table 元素
                    自动将元素宽度收缩为合适                  [shrink-to-fit]
+        (紧包性)
      3. 收缩到最小: table-layout:auto, 表格的列元素设置成宽度最小
                                                         [min-content]
      4. 超出容器限制: 内联元素设置成 wihte-space:nowrap.
@@ -194,7 +201,7 @@ width：auto 下的四种宽度表现：
 外部尺寸与流：
    上述的四种宽度表现，第一种 [fill-avaliable] 下的尺寸是外部表现， 具体是 <div> 元素标签放入到水平流中时自动铺满整个水平流。
 
-格式化宽度： 格式化宽度仅出现在 '绝对定位模型' 中， position: absolute / fixed 元素中。 默认情况下， 绝对定位元素的宽度表现是包裹性的， 宽度由内部尺寸决定。 但是， 当left/right ,或者 top/bottom 同时出现时[其宽度大小相对于最近的父元素，其position 属性值不为 static ]
+格式化宽度： 格式化宽度仅出现在 '绝对定位模型' 中， position: absolute / fixed 元素中。 默认情况下， 绝对定位元素的宽度表现是包裹性的， 宽度由内部尺寸决定。 但是， 当left/right ,或者 top/bottom 同时出现时[其宽度大小相对于最近的父元素，其 position 属性值不为 static ]
 
 内部尺寸与流：
    内部尺寸：元素尺寸由内部元素决定。 元素没有内容时，宽度为0。
@@ -273,8 +280,8 @@ border： 宽度、 样式 、 颜色  (顺序不重要)
                                  未定义初始值
          8. border-top-color、 border-right-color、 border-bottom-color
             border-left-color,元素的颜色(初始值）
-         9. 单边框属性设置: border-left、 border-right、 border-top、 border-
-            bottom
+         9. 单边框属性设置: border-left、 border-right、 border-top、 
+            border-bottom
          10.行内元素： 不论为行内元素的边框指定怎样的宽度， 元素的行高都不会改变。
 
 padding： <length> | <percentage>   (内边距绝对不能为负)
@@ -358,7 +365,7 @@ height：100%问题
 元素支持 height：100%效果
   1. 设定显示高度值
                   html, body{
-                                height:100%
+                               height:100%
                             }
   2. 使用绝对定位
         非绝对定位下，元素的高度是相当于 content-box 计算
@@ -368,7 +375,7 @@ height：100%问题
 
 #### 内联元素
 
-```
+```css
 文字、 图片、 按钮、 表单控件都是内联元素
 
 内联元素的外在盒子都是内联盒子。  并且内联元素中的内联指的是外在盒子， 与display：inline
@@ -385,13 +392,6 @@ height：100%问题
 幽灵空白节点：HTML5 的所有内联元素的解析和渲染表现的像其之前有一个空白节点。
 行框盒子的高度由内部最大的内联和子高度决定。
 ```
-
-```
-
-  
-```
-
-
 
 ### 块级元素列表
 
@@ -515,7 +515,7 @@ MDN： https://developer.mozilla.org/zh-CN/docs/Web/HTML/Inline_elements
 
 替换元素与非替换元素的差距：
          a. 替换元素具有 src 属性， fileFox 下 img 元素缺少 src 会变成行内非替换
-            chrome 浏览器下 缺少 src 和 alt="" 同样会发生上述变换
+            chrome 浏览器下缺少 src 和 alt="" 同样会发生上述变换
          b. 替换元素和非替换元素之间只隔了一个 CSS content 属性！
             i. chrome 浏览器下， 所有元素都支持 content 属性，当非替换元素声明content
                属性会被置换为替换元素。
@@ -572,7 +572,6 @@ content 内容生成技术：
              text-align: justify; 
             } 
             .box:before { 
-            4.1 深入理解 content 59
              content: ""; 
              display: inline-block; 
              height: 100%; 
@@ -1246,7 +1245,7 @@ absolute： 包裹性、 块状性、 破坏性
 10 absolute 的流体特性
     a. 仅仅设置一个方向： 元素的另外方向的流体特性依然保留。
 
-    b. 若同时声明left=0 和 right=0 则 absolute 发生流体特性会自动        化上下文。此时子元素宽度 = 父元素padding box宽度 + content        box 宽度。
+    b. 若同时声明left=0 和 right=0 则 absolute 发生流体特性会自动格式化化上下文。此时子元素宽度 = 父元素 padding box 宽度 + content box 宽度。
 
 11 absolut 和 margin：auto
    a. 绝对定位元素的 margin:auto 的填充规则和普通流体元素的一模一样
@@ -1259,6 +1258,110 @@ absolute： 包裹性、 块状性、 破坏性
              left: 0; right: 0; top: 0; bottom: 0; 
              margin: auto; 
         }
+```
+
+#### position:relative
+
+```
+1. relative定位特性:
+    a.相对自身：
+    
+    b. 无侵入： 自身发生移动不会影响上下左右的元素， 原本的位置空间依然
+               保留。
+    
+  相对自身定位： 
+  
+2. relative 的百分比值是相对于包含块来算的，具体如下：
+     a. top / bottom 垂直方向的百分比是按照包含块的高度 height
+        若是 auto 则计算无效 计算值为0。
+     b. top/bottom 同时使用时 bottom 无效
+        left/right 同时使用时 left 无效
+        
+3. relative 最小化原则
+     a. 尽量不使用 relative，如果想定位某些元素，看看能否使用“无依赖的
+        绝对定位”；
+     b. 如果场景受限，一定要使用 relative，则该 relative 务必最小 
+        化。  最小化指的是包含的子元素最小， 因为子元素的父元素 relative 则其层
+        叠等级变高。
+        
+
+```
+
+#### position:fixed
+
+```
+
+```
+
+#### CSS 层叠规则
+
+```css
+层叠规则： 当网页上元素发生重叠的时候的表现规则
+
+1. z-index : z 轴顺序， 只有和定位元素在一起时才有作用，可以是正数也可以是负数
+             数值越大等级越高。
+
+2. stacking context： 层叠上下文， 如果一个元素含有层叠上下文，我们可以理解为这个元素在 z 轴上就“高人一等。 
+
+3. stacking level： 层叠水平， 其指的是同一层叠上下文中的元素 z 轴上的显示顺序。  stacking level 水平和和 z-index 不同， z-index 觉得定位元素的层级水平。 层叠水平指的是在一个层叠上下文中所有元素 z轴的顺序。
+
+
+4. 层叠规则：  装饰  -->  布局 ---> 内容
+    
+      a. 具体如下： background --> 负z-index --> block块状水平盒子
+                  float浮动盒子 --> incline水平盒子 --> z-index：auto/0
+                  正z-index
+   CSS 世界是为更好的图文展示而设计的，因此，一定要让内容的层叠顺序相当高，这样当发生层叠时，重要的文字、图片内容才可以优先显示在屏幕上。
+   定位元素一旦被声明， 其z-index:auto, 自动生效，因此层级在普通元素之上。
+ 
+5 两条层叠规则：
+     a. 谁大谁上：当具有明显的层叠水平标识的时候，如生效的 z-index 属性值，在同一个层叠上下文领域，层叠水平值大的那一个覆盖小的那一个。
+     b. 后来居上：当元素的层叠水平一致、层叠顺序相同的时候，在 DOM 流中处于后面的
+元素会覆盖前面的元素
+   
+6. 层叠上下文元素有如下特性：
+     a. 层叠上下文的层叠水平要比普通元素高
+     b. 层叠上下文可以阻断元素的混合模式
+     c. 层叠上下文可以嵌套，内部层叠上下文及其所有子元素均受制于外部的“层叠上下
+        文”。
+     d. 每个层叠上下文和兄弟元素独立，也就是说，当进行层叠变化或渲染的时候，只需要
+        考虑后代元素。       相邻元素层叠变化不相互影响。
+     e. 每个层叠上下文是自成体系的，当元素发生层叠的时候，整个元素被认为是在父层叠
+        上下文的层叠顺序中。  子元素继承父元素的层叠顺序。
+   
+
+7. 层叠上下文的创建：
+    a. 天生派： 页面根元素天生具有层叠上下文
+    b. 正统派： z-index 值为数值的定位元素
+    c. 扩招派： CSS3 带来的属性
+
+  根元素构建了一个层叠上下文，包含了所有子元素。
+
+  层叠上下文类似于块级格式化上下文， 也是指明在某一个区域上元素的层叠水平， 相邻层叠上下文中的元素的层叠水平的比较是父元素层叠水平比较结果， 若两者相同则按照后来居上原则。 
+
+   对于 position 值为 relative/absolute 以及 Firefox/IE 浏览器（不包括 Chrome 浏览器）下含有 position:fixed 声明的定位元素，当其 z-index 值不是 auto 的时候，会创建层叠上下文。 chrome 浏览器 的 position:fixed 自带层叠上下文。
+
+8 深入理解 z-index 负值
+  
+
+
+8. CSS3 与 新时代层叠上下文
+
+（1）元素为 flex 布局元素（父元素 display:flex|inline-flex），同时 z-index
+值不是 auto。 
+（2）元素的 opacity 值不是 1。 
+（3）元素的 transform 值不是 none。 
+（4）元素的 mix-blend-mode 值不是 normal。 
+（5）元素的 filter 值不是 none。 
+（6）元素的 isolation 值是 isolate。 
+（7）元素的 will-change 属性值为上面 2～6 的任意一个（如 will-change:opacity、
+    will-chang:transform 等）。
+（8）元素的-webkit-overflow-scrolling 设为 touch。
+
+9. 深入理解 z-index 负值
+  z-index 负值渲染的过程就是一个寻找第一个层叠上下文元素的过程，然后层叠顺序止步于这个层叠上下文元素。
+
+10 z-index 值不超过2
 ```
 
 
