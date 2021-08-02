@@ -27,6 +27,10 @@ CSS 标签提供文档元素样式， [通过向便签提供选择器]，将样�
      元素尺寸： border box尺寸      原生的DOM API写作： offsetHeight/offsetWidth
      元素内部尺寸： padding box尺寸  原生的DOM API写作： clientWidth/clientHeight
      元素外部尺寸： margin box尺寸   没有相应的DOM API 
+
+CSS 眼中：  选择器 、 css 属性、  HTML 元素、 流
+流： 容器内部的初始环境， 其包括布局方式：元素位置+尺度大小、 方向(从左向右)
+    通过对流的破坏获得更丰富的布局方式
 ```
 
 ### 历史
@@ -198,12 +202,20 @@ width：auto 下的四种宽度表现：
      1. Instrinsic Sizing： 内部尺寸， 元素尺寸由内部元素决定，并非外部的容器
      2. Extrinsic Sizing：  外部尺寸
 
-外部尺寸与流：
+外部尺寸与流：  流未遭受破坏
+    
+    1. 正常流宽度 ： 正常流带来的外部尺寸自动分配
+    2. 格式化宽度 ： 定位元素，其空间大小由最近的定位父元素宽度决定。(position 有这样的特性)
+    
    上述的四种宽度表现，第一种 [fill-avaliable] 下的尺寸是外部表现， 具体是 <div> 元素标签放入到水平流中时自动铺满整个水平流。
 
 格式化宽度： 格式化宽度仅出现在 '绝对定位模型' 中， position: absolute / fixed 元素中。 默认情况下， 绝对定位元素的宽度表现是包裹性的， 宽度由内部尺寸决定。 但是， 当left/right ,或者 top/bottom 同时出现时[其宽度大小相对于最近的父元素，其 position 属性值不为 static ]
 
-内部尺寸与流：
+内部尺寸与流： 流遭受了破坏 (浮动元素、 position 元素、 inline-block 元素)
+    1. 紧包性(包裹性): 自适应内容宽度， 不破坏布局
+    2. 首选最小宽度： 内容样式大于布局， 会有最小宽度
+    3. 最大宽度
+    
    内部尺寸：元素尺寸由内部元素决定。 元素没有内容时，宽度为0。
 
    包裹性： 元素尺寸由内部元素决定， 但永远小于包含块的属性。即当元素设置为incline-block,不论元素的内容有多少，都不会超过容器。
@@ -639,7 +651,9 @@ content 内容生成技术：
       c. incline 元素的 padding 层叠属于后者，证明方式是 overflow:
 auto, 是否会超出层叠区。
 
-2. padding的作用： 利用层叠效果我们可以增加按钮的区域
+   padding 无负值， 其宽度相当于元素宽度计算。
+
+2. padding的作用： 利用层叠效果我们可以增加按钮的区域， 不改变布局但区域得到有效增加
 
 3. 标签元素内置的 padding  
      a. ul 默认padding-left：40px (chrome 浏览器中)
@@ -705,6 +719,10 @@ auto, 是否会超出层叠区。
 4. 滚动容器底部留白使用 margin-bootom 可在各样浏览器下完成功能。
 
 5. margin 合并
+   1. 相邻兄弟元素发生合并
+   2. 父子元素发生合并： 外套 div 不会影响到原来的布局
+   3. 空级元素的 margin 合并
+
    ： 块级元素的上外表距与下外边距有时会合并为单个外边距
    特点： 只发生在块级元素， 不包括浮动和绝对定位元素(他们也可以让元素块状化)
    发生场景： 
@@ -724,11 +742,33 @@ auto, 是否会超出层叠区。
         iiii. 父元素和最后一个子元素之间添加内联元素
      
      margin 合并原则： 正正取最大值 正负取相加 负负取最负 
+
+margin：auto ： 可替代  float 实现元素的向左向右对齐
+     1. 一侧固定值， 一侧 auto 则 auto 自动填充剩余空间
+     2. 两侧是 auto 平分剩余空间
+     3. 触发 margin:auto  无法垂直居中的原因， 是子元素的高度不是自动填充，即使父元素&子元素都设置了 
+        height 剩余高度空间也不是差值， 因此margin：auto 计算值也为0. 解决办法可以使用 position 设置 
+        top&bottom&left&right=0 子容器空间高度被自动填满， 此时 margin:auto 可以起作用
+
+margin 无效：
+     1. display 计算值 inline 的非替换元素的垂直 margin 是无效的，对于内联替换元素，
+        垂直 margin 有效，并且没有 margin 合并的问题，所以图片永远不会发生 margin 合并。
+     2. 鞭长莫及导致的 margin 无效：  需要深入理解 float 和 overflow
+     3. 内联特性导致的 margin 无效：  需要对 vertical-align 和 内联盒模型 有深入的理解
 ```
 
 #### border
 
 ```
+border：1px solid red
+border-top
+border-bottom:
+border-left;
+border-right;
+
+border-style：
+border-color:
+
 
 ```
 
@@ -938,28 +978,50 @@ d. line-height 值等于 内容区+上下边界
 #### float
 
 ```css
-前言：float 属性的原本作用“只是为了实现文字环绕效果”
+前言：
+    float 属性的原本作用“只是为了实现文字环绕效果”
 
 作者观点： 无宽度， 无浮动
 
 float 属性： 
       a. 包裹性 ：自动将浮动元素宽度收缩为合适的子元素宽度大小。
-      b. 块状化并格式化上下文
-      c. 破坏文档流
+      b. 块状化并格式化上下文： float值不为none display 值是 block 或者 table
+      c. 破坏文档流： 父元素高度塌陷，正是 float 实现环绕的核心机制
       d. 没有任何 margin 合并
+不要指望使用 text-align 属性控制浮动元素的左右对齐，因为 text-align 对块级元素是无效的。
       
 float 发生环绕作用机制
-      a. 高度塌陷
+      a. 高度塌陷： 父元素在未设置高度时，子元素为 float 其高度不会计算入父元素高度中。
       b. 行框盒子和浮动元素的不可重叠性。即使margin-left：-100 也不可以改变。
    高度塌陷： 父元素在不设置高度的前提下， 子元素为float时，该子元素的高度不计入
             父元素高度下。
  
 float 发射环绕作用机制两个细节：
       a. 浮动锚点： float 元素所在流中的一个点，该点本身不浮动。表现而言像
-                  一个没有margin、 border、 padding 的空白元素。
-      b. 浮动参考:  浮动元素对齐参考的实体。 其参考实体是行框盒子。
+                  一个没有margin、 border、 padding 的空白元素，当 float 元素前后都是块元素，则
+                 浮动锚点相当于行框，帮助对齐。
+      b. 浮动参考:  浮动元素对齐参考的实体。 其参考实体是行框盒子。因此在两行的文本中， 其后的float 元素
+                   会跟在第二行而并非是第一行
       
+float 元素脱离文档流， margin-left 不会以上一个 float 的 margin 为起始点进行定位
 float 实现两栏布局： 核心在于第二栏设置 marigin-left
+
+   两栏： .animal 元素没有浮动，也没有设置宽度，因此，流动性保持得很好
+        <div class="father"> 
+         <img src="me.jpg"> 
+         <p class="animal">小猫 1，小猫 2，...</p> 
+        </div> 
+        .father { 
+         overflow: hidden; 
+        } 
+        .father > img { 
+         width: 60px; height: 64px; 
+         float: left; 
+        } 
+        .animal { 
+         margin-left: 70px;  相当于窗口边缘， 需要保证长度大于图片长度， 从而不发生文字环绕
+        }
+  三栏：
       .prev { 
          float: left; 
        } 
@@ -971,6 +1033,25 @@ float 实现两栏布局： 核心在于第二栏设置 marigin-left
          text-align: center; 
        }
 
+clear ： none | left | right | both
+
+clear 属性的解释是：“元素盒子的边不能和前面的浮动元素相邻，clear 属性对“后面的”浮动元素是不闻不问的。
+      clear 并不是设置到浮动元素上，而是设置到抗浮动的元素上
+
+clear ： 只能作用在块级盒子上， 因此使用:after生成伪元素默认是内联，要设置display：block 属性
+                    .clear:after { 
+                     content: ''; 
+                     display: table; // 也可以是'block'，或者是'list-item' 
+                     clear: both; 
+                    }
+
+clear:both 的作用本质是让自己不和 float 元素在一行显示，并不是真正意义上的清除浮动。
+    1. 如果 clear:both 元素前面的元素就是 float 元素，则 margin-top 负值即使设成-9999px，也不见任何 
+       效果。按照设想应该是向上平移，但是由于 clear:both阻止与浮动元素同行，因此无法移动。
+    2. clear:both 后面的元素依旧可能会发生文字环绕的现象， 当用于生成的抗浮动伪元素无宽高。
+
+总： clear:both 只能在一定程度上消除浮动的影响，要想完美地去除浮动元素的需要使用： overflow
+
 ```
 
 #### BFC
@@ -979,8 +1060,11 @@ float 实现两栏布局： 核心在于第二栏设置 marigin-left
 block formatting context： 块级格式化上下文
 
 特性： 
-       1. 一个元素具有 BFC 内部子元素不会影响带外部元素。 
-       2. 实现健壮、 智能的自适应布局。自动填满容器
+       1. 一个元素具有 BFC 内部子元素不会影响外部元素， 外部元素不会影响到内部。
+ 
+作用： 
+       1. 实现健壮、 智能的自适应布局。自动填满容器
+       2. 
     
     延伸： 根据第一条，BFC 元素不
           会发生 margin 重叠， 重叠是会影响外部元素的。
@@ -994,13 +1078,23 @@ block formatting context： 块级格式化上下文
        5. position 的值不为 relative 和 static。
        
 
-float 不为none：float 元素本身的破坏性格包裹性，使元素自身失去了流动性无法                用于实现自动填满容器的自适应布局。
+float 不为none：float 元素本身的破坏性格包裹性，使元素自身失去了流动性无法用于实现自动填满容器的自适应布局。
 position：absolute， 脱离文档流严重， 无实现自动的填满容器自适应布局。
 overflow：hidden， 其本身是普通元素，块状元素流体性保持完善。
 display：inline-block 会让元素尺寸包裹收缩， 同样失去流动性。
 
+两栏自动布局
+                        <div class="father"> 
+                         <img src="me.jpg"> 
+                         <p class="animal">小猫 1，小猫 2，...</p> 
+                        </div> 
+                        img { float: left; }
+                        .animal{
+                           overflow: hidden;
+                        }
+    文字在 BFC 中为了不被浮动元素影响，同时不影响浮动元素， 文字会自动沿着float 元素的右边排列。
 
-BFC 声明中能够适应自适应的是以下属性：
+即具有 BFC 也保留流的自动适应特性：
     a. overflow: auto/hidden 适应于IE7
     b. display:inline-block  适用于IE6和IE7
     c. display:table-cell    IE8及以上浏览器
@@ -1158,22 +1252,25 @@ absolute： 包裹性、 块状性、 破坏性
 
 2. 元素一旦 position 属性值为 absolute 或 fixed，其display 计算值就是 block 或者 table
 
-3. absolute 的包含块：
-   a. 包含块： 元素用于计算自身宽度和高度的参考块，普通元素的包含块是其父元素。
+3. 
+   a. 包含块： 元素用于计算自身宽度和高度的参考块，普通元素的包含块是其父元素的 content box。
    b: 元素的包含块由其 position 定义
      i: 根元素（很多场景下可以看成是<html>）被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
      ii: 如果该元素的 position 是 relative 或者 static，则“包含块”
-由其最近的块容器祖先盒的 content box 边界形成。
+         由其最近的块容器祖先盒的 content box 边界形成。
      iii:如果元素 position:fixed，则“包含块”是“初始包含块”。
-     IV:如果元素 position:absolute，则“包含块”由最近的 position 不为 static的祖先元素建立，边界是 padding box 具体方式如下:
+     IV:如果元素 position:absolute，则“包含块”由最近的 position 不为 static的祖先元素建立，边界是 padding box 具体方式如下:     (position 的包含块有可能是一个内联元素)
        (1) 假设给内联元素的前后各生成一个宽度为 0 的内联盒子（inline box），则这两个内联盒子的 padding box 外面的包围盒就是内联元素的“包含块”；
        (2) 如果该内联元素被跨行分割了，那么“包含块”是未定义的，也就是 CSS2.1规范并没有明确定义，浏览器自行发挥。
-       否则，“包含块”由该祖先的 padding box 边界形成。
+       否则，“包含块”由该祖先的 padding box 内边界形成。
            
      V：如果没有符合条件的祖先元素，则“包含块”是“初始包含块”。
     
      内联元素的“包含块”是由“生成的”前后内联盒子决定的，与里面的内联盒子细节没有任何关系。
-     
+ 
+绝对定位元素设置 height:100% &  height:inheriet 是不同的， height:100% 是相对于最近的定位祖先元素
+height:inherit 是纯粹的祖先元素。
+
 4. 绝对定位元素的包裹性是相对于包含块来表现的。
      .container { 
          width: 200px; 
@@ -1211,12 +1308,15 @@ absolute： 包裹性、 块状性、 破坏性
    e. 由于 position:fixed 固定定位元素的包含块是根元素，因此，除非是窗体滚动，否则上面讨论的所有 overflow 剪裁规则对固定定位都不适用。
 
   e. css3 世界带来某些规则的改变， transform 属性有不完全的定位属性
-     i overflow 元素自身 transform： • IE9 及以上版本浏览器、            • Firefox 和 Safari（OS X、iOS）剪裁；
+     i overflow 元素自身 transform：
+       • IE9 及以上版本浏览器、            
+       • Firefox 和 Safari（OS X、iOS）剪裁；
        • Chrome 和 Opera 不剪裁。
   
-    ii. overflow 子元素 transform： • IE9 及以上版本浏览器、     
+    ii. overflow 子元素 transform： 
+        •  IE9 及以上版本浏览器、     
         •  Firefox 和 Safari（OS X、iOS）剪裁；
-        • Chrome 和 Opera 剪裁。
+        •  Chrome 和 Opera 剪裁。
   
 
 9. absolute 与 clip
@@ -1244,8 +1344,7 @@ absolute： 包裹性、 块状性、 破坏性
      
 10 absolute 的流体特性
     a. 仅仅设置一个方向： 元素的另外方向的流体特性依然保留。
-
-    b. 若同时声明left=0 和 right=0 则 absolute 发生流体特性会自动格式化化上下文。此时子元素宽度 = 父元素 padding box 宽度 + content box 宽度。
+    b. 若同时声明 left=0 和 right=0 则 absolute 发生流体特性会自动格式化上下文。此时子元素宽度 = 父元素 padding box 宽度 + content box 宽度。
 
 11 absolut 和 margin：auto
    a. 绝对定位元素的 margin:auto 的填充规则和普通流体元素的一模一样
@@ -1283,8 +1382,6 @@ absolute： 包裹性、 块状性、 破坏性
      b. 如果场景受限，一定要使用 relative，则该 relative 务必最小 
         化。  最小化指的是包含的子元素最小， 因为子元素的父元素 relative 则其层
         叠等级变高。
-        
-
 ```
 
 #### position:fixed
@@ -1296,6 +1393,11 @@ absolute： 包裹性、 块状性、 破坏性
 #### CSS 层叠规则
 
 ```css
+名词：  
+   层叠水平： 同一个层叠上下文中元素的显示顺序  
+   层叠顺序： 规则， 元素发生层叠时特定的垂直显示顺序  
+   层叠上下文： 类似于 BFC 层叠上下文的元素比普通元素层叠水平高。
+
 层叠规则： 当网页上元素发生重叠的时候的表现规则
 
 1. z-index : z 轴顺序， 只有和定位元素在一起时才有作用，可以是正数也可以是负数
@@ -1325,15 +1427,17 @@ absolute： 包裹性、 块状性、 破坏性
      c. 层叠上下文可以嵌套，内部层叠上下文及其所有子元素均受制于外部的“层叠上下
         文”。
      d. 每个层叠上下文和兄弟元素独立，也就是说，当进行层叠变化或渲染的时候，只需要
-        考虑后代元素。       相邻元素层叠变化不相互影响。
+        考虑后代元素。相邻元素层叠变化不相互影响。
      e. 每个层叠上下文是自成体系的，当元素发生层叠的时候，整个元素被认为是在父层叠
-        上下文的层叠顺序中。  子元素继承父元素的层叠顺序。
+        上下文的层叠顺序中。子元素继承父元素的层叠顺序。
    
 
-7. 层叠上下文的创建：
+7. 层叠上下文的创建：  不是所有元素都可以创建层叠上下文
     a. 天生派： 页面根元素天生具有层叠上下文
-    b. 正统派： z-index 值为数值的定位元素
+    b. 正统派： z-index 值为数值 0| 正数 |负数 的定位元素
     c. 扩招派： CSS3 带来的属性
+
+对于 position:fixed  的元素不需要 z-index 会自动生成层叠上下文
 
   根元素构建了一个层叠上下文，包含了所有子元素。
 
@@ -1341,9 +1445,8 @@ absolute： 包裹性、 块状性、 破坏性
 
    对于 position 值为 relative/absolute 以及 Firefox/IE 浏览器（不包括 Chrome 浏览器）下含有 position:fixed 声明的定位元素，当其 z-index 值不是 auto 的时候，会创建层叠上下文。 chrome 浏览器 的 position:fixed 自带层叠上下文。
 
-8 深入理解 z-index 负值
-  
-
+1. 如果层叠上下文元素不依赖 z-index 数值，则其层叠顺序是 z-index:auto，可看成 z:index:0 级别；  
+2. 如果依赖 z-index 数值， 则层叠顺序由 z-index 值决定。
 
 8. CSS3 与 新时代层叠上下文
 
@@ -1387,6 +1490,37 @@ bcakground-clip：
 word-break: break-all;   // 连续英文字符换行
 
 ```
+
+### CSS选择器
+
+```javascript
+A  B  C  D
+
+1. 内联选择器设 A：1
+2. Id 选择器设 B：1
+3. 类选择器，属性选择器，伪类选择器 C：1
+4. 元素选择器 ，伪元素选择器 D：1
+
+!important 优先级最高
+.app {
+	color: 0f0 !important;
+}
+max-width 可以超越 width !important 
+```
+
+### 水平垂直居中方案
+
+```
+1. Flex 方案
+2. Grid 方案
+3. absolute + transform
+4. absolute + calc
+5. absolute + 负 margin
+6. absolute + margin: auto
+7. writing-mode
+```
+
+
 
 ### CSS注意事项
 
