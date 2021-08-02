@@ -21,8 +21,6 @@
 
 ```
 
-
-
 ### Vue-x
 
 ```vue
@@ -365,10 +363,6 @@ Shorthands
    注： Remember that global registration must take place before the root Vue instance is created
 ```
 
-
-
-
-
 ## Vue 项目
 
 ### Node & Vue-cli
@@ -435,8 +429,6 @@ Install Vue-cli
     b. bin/www: 用来开启服务器的脚本
     c. routes/index.js : 路由主文件
     d. views/index.ejs: 主页的模板文件
-    
-
 ```
 
 ### 项目结构梳理
