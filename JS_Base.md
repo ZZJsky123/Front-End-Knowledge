@@ -1552,8 +1552,9 @@ https://juejin.cn/post/6968591172918837284
             static compare(){}     // 静态方法， 将方法作为对象属性进行添加
          }
     【ES6】继承：  
-     在ES6之前： Ninja.compare， 由于方法不在prototype上因此实例对象访问不到。
-     添加原型的方法： Object.setPrototypeOf(对象， 原型）
+     在ES6之前： Ninja.compare， 由于方法不在prototype上因此实例对象访问不到。 
+         
+    添加原型的方法： Object.setPrototypeOf(对象， 原型）
 
 【getter 和 setter 控制属性访问】：
       【需求】： 1. 避免赋错误类型的值
@@ -1818,6 +1819,7 @@ ES6模块
                   }
          })
 handle 装载的所有方法：
+             Internal Method     handle Method
            [[GetPrototypeOf]]    getPrototypeOf
            [[SetPrototypeOf]]    setPrototypeOf
             [[IsExtensible]]      isExtensible
@@ -1832,7 +1834,134 @@ handle 装载的所有方法：
               [[OwnPropertyKeys]]       ownKeys
                  [[Call]]                apply
                [[Construct]]            construct
-       
+
+  Every Proxy objects has an iternal slot called [[ProxyHandler]] ,its value is an object called the proxy's handler object,or null. Every proxy object also has an internal slot called [[ProxyTarget]] whose value is either an object or the null value. it is called the proxy's target object
+  
+  The [[ProxyHandler]] and [[ProxyTarget]] internal slots of a proxy object are always initialized when the object is created and typically may not be modified. 初始化时被创建， 通常不会被修改
+
+the handle method is called to provide the implemention of proxy object internal method , handler method was passed a argument [proxy’s target object] . [注] 如果 handler object does not have method corresponding to the internal trap. 其会 invocation of corressponding internal method on the proxy's target object.
+
+O is an ECMAScript proxy object, P is a property key value, V is any ECMAScript language value and DESC is a Property Descriptor record. 
+
+
+[[GetPrototypeOf]]  --- getPrototypeOf
+1. Let handler be the value of the [[ProxyHandler]] internal slot of O
+2. if handler is null , throw  a TyperError exception
+3. Assert:Type(handler) is Object
+4. Let target be the value of the [[ProxyTarget]] internal slot of O
+5. Let trap be GetMethod(handler, "getPrototypeOf")
+6. ReturnIfAbrupt(trap)
+7. if trapp is undefined then
+     Return target[[GetPrototype]]()
+8. Let handlerProto be Call(trap, handler, target)
+9. ReturnIfAbrupt(handlerProto)
+10.if Type(handlerProto) is neither Object or null, throw TypeError
+11. Let extensibleTarget be isExtensible(target)
+12. ReturnIfAbrupt(extensibleTarget)
+13. if extensibleTarget is true ,return handlerProto
+14. Let targetProto be target[[GetPrototypeOf]]()
+15. ReturnIfAbrupt(targetProto)
+16. if SameValue(handlerProto, targetProto)is false throw TyperError 
+    exception
+17. if SameValue(handlerProto, targetProto) is false throw TypeErroe
+18. Return handlerProto 
+
+ [[Get]]            --- get
+1.Assert: IsPropertyKey(P) is true.
+2.Let handler be the value of the [[ProxyHandler]] internal slot of O.
+3.if handlder is null throw a TypeError
+4.Assert： Type(handle) is Object
+5.Let target be the value of the [[ProxyTarget]] internal slot of O
+6.Let trap be GetMethod(handler, "get").
+7.ReturnIfAbrupt(trap)
+8.if trap is undefined then
+a. Return target[[Get]](P, Receiver)
+9.Let trapResult be Call(trap, handler, «target, P, Receiver»).
+10.ReturnIfAbrupt(trapResult).
+11.Let targetDesc be target.[[GetOwnProperty]](P).
+12.ReturnIfAbrupt(targetDesc).
+13.If targetDesc is not undefined, then
+a.  If IsDataDescriptor(targetDesc) and targetDesc.[[Configurable]] is false 
+and targetDesc.[[Writable]] is false, then
+i. If SameValue(trapResult, targetDesc.[[Value]]) is false, 
+    throw a TypeError exception.
+    b. if IsAccessorDescriptor(targetDesc) and targetDesc.
+    [[Configurable]] is false and targetDesc.[[Get]] is undefined then
+    i.If trapResult is not undefined, throw a TypeError 
+    exception.
+    14. Return trapResult.       
+```
+
+#### Iterator
+
+```
+Iterator 【遍历】器为什么被提出
+1. ES6， 又提出两种数据结构， Map 和 set， 加上原本的 Array 和 Object， 共有4种数据结构。 
+   此时需要统一的接口机制访问不同的数据结构。 
+2. for..of.. ，是ES6引入的， Iterator主要供其消费。
+
+Iterator 的作用
+1. 遍历器 Iterator 是一种机制，它是一种接口，为各种不同的数据结构提供统一的访问机制。任何数据结构只要部署Iterator接口，就可以完成遍历操作。 
+   机制： 触发是靠遍历某种数据结构
+                过程
+           返回数据结构的元素
+           
+Iterator 的过程
+1. 创建遍历器对象， 其是一个指针， 指向当前数据结构的起始位置
+2. 调用指针对象上的next方法， 指针指向数据结构的第二个成员
+3. 不断调用指针对象的next方法， 直到它指向数据结构的结束位置
+4. next 方法会返回当前数据结构的成员信息， 返回一个包含 value 和
+   done 两个属性的对象， value是的当前成员的值， done 是一个布尔值，表示遍历是否结束。
+ 
+Iterator 的实现
+  Obj.prototype[Symbol.iterator] = function() {
+  var iterator = { next: next };
+  var current = this;
+
+  function next() {
+    if (current) {
+      var value = current.value;
+      current = current.next;
+      return { done: false, value: value };
+    }
+    return { done: true };
+  }
+  return iterator;
+}
+
+ES6 中的 Iterator
+
+1. 一个数据结构只要具备 Symbol.iterator 属性，则可认为该数据及结构是可以遍历的，Symbol.iterator 本身是一个【遍历器生成函数】， 原生具备遍历器结构的数据结构：Array、Map、Set、String、 arguments、 Nodelist 对象。 
+     let arr = ['a', 'b', 'c'];
+     let iter = arr[Symbol.iterator]()   iter是遍历器
+2. 对于可迭代的数据结构，都要将生成遍历器放在 Symbol.iterator上。
+
+3. Array、 Map、 Set、 类数组对象、 DOM的NodeList对象、 Generator对象  
+                         |
+                         |
+                  achieve Iterator
+                         |
+                         |
+        for..of   ...extend grammer  [] 解构运算符   使用 Iterator 访问数据
+
+4. 遍历器对象的 return(), throw() 方法
+
+   return：  for..of 中途断开后， 会调用 return()方法， 可以在其中放置
+             释放资源
+ 
+5. 利用 Generator 函数去实现 Iterator 
+
+
+6. for...of ： 获得键值， 而不是键
+ 
+  1. for..of 内部调用的是 Symbol.iterator方法， 其可遍历：数组
+     Map、 Set、 类数组对象、 DOM的NodeList对象、 Generator对象 
+            （类数组对象特性： 对象成员有序）
+  2. Map 和 Set 的遍历
+     let map = new Map().set("name", "zzj").set("age", 24);
+     for (let [key, value] of map){
+         xxx 
+     } 
 ```
 
 #### Generator
@@ -1847,6 +1976,8 @@ Generator 的特征
   3. 它返回一个【遍历器对象】，用于依次遍历 Generator 函数内部的每一个状态
   4. 调用返回的 内部状态指针对象 的 next 方法 ，指针在上一次停止的地方执行，遇到
      下一个 yield 和 return 语句为止。
+  5. 暂停执行， 第一次函数调用是返回一个遍历器对象，当调用 【next方法】时函数才会开始
+     执行。
      
 yield 的表达式
   遍历器对象 next 方法的执行逻辑：
@@ -1867,7 +1998,8 @@ yield 的表达式
 
 与 Iterator 接口的关系
     1. Generator 函数返回遍历器对象， 因此是遍历器生成函数， 可以把Generator
-       赋值给对象的 Symbol.iterator , 使得对象可迭代。
+       赋值给对象的 Symbol.iterator , 使得对象可迭代。对象迭代返回什么完全由
+       Generator 函数中的 yield 表达式决定。
              var myIterable = {};
             myIterable[Symbol.iterator] = function* () {
               yield 1;
@@ -1896,13 +2028,294 @@ next 方法的参数
                 b.next() // { value:6, done:false }
                 b.next(12) // { value:8, done:false }
                 b.next(13) // { value:42, done:true }
+    3. V8引擎默认第一次调用 next 函数参数会忽略， 下一次 next 参数会作为上一个yield表达式的
+       返回值。
                 
 for... of 循环
   1. for...of 循环可以自动遍历 Generator 函数运行时生成的 Iterator 对象， 且此时不再需要调用 next 方法。
+            function Ficconb(){
+                let [pre, cur] = [0, 1];
+                yield cur;
+                while(true){
+                  [pre, cur] = [cur, pre + cur];
+                }
+            }
+            
+            for(let n of fibonacci()){
+                if(n > 1000) break;
+                console,log(n);
+            }
+  2. for...of 不会捕捉return语句的返回值
+  
+Generator函数 返回遍历器对象被其他运算符直接使用
+                    Generator 函数调用
+                         |
+                         |
+                   return Iterator 对象
+                         |
+                         |
+    for..of 迭代对象   ...迭代对象  [x,y] (解构运算符) = 迭代对象   使用 Iterator 访问数据
+  
+Generator.prototype.throw()
+    1. Generator 函数内部返回遍历器对象，具备一个 throw() 函数，调用该方法抛出
+       的错误会在 Generator 内部捕获。
+    2. 若内部没有 try-catch 语句， 则错误将被外部 try-catch 捕获
+    3. throw() 方法调用前提是 Generator 函数执行过一次next()方法， 因为开始调用
+       next方法程序的代码才可以开始被执行。 执行内部 try-catch 方法后会执行其后的
+       yield 表达式， 即使执行完 try-catch， 后面的 yeild 语句可以被继续执行。
+    4. Generator 执行过程中抛出错误，没有被内部捕获，就不会再执行下去了。如果此后还调用next方法，
+       返回一个value属性等于undefined、done属性等于true的对象，即 JS 引擎认为这个                        Generator 已经运行结束了。
+    5. 一个 Generator 函数只能定义一个 try-catch 块， 只能调用一次throw()方法， 下次调用则只
+       会在外部捕捉。
+    
+Generator.prototype.return(value)
+    1. 遍历器对象有一个 return 方法，返回给定的值，done 属性为true ，结束 Generator 函数运行
+    2. 如果 Generator 函数内部有try...finally代码块，且正在执行try代码块，那么return()方法会导            致立刻进入finally代码块，执行完以后，整个函数才会结束。 (这与 finally 存放的逻辑有关系，会
+       保证 finally 的内容执行完毕才会运行 return 语句)。
+    3. return方法可以人为的结束 Generator 
+ 
+
+Generator 函数作为对象属性： 
+    1. let obj = {
+              myGeneratorMethod: function* () {
+                // ···
+              }
+       };
+     2. let obj = {
+             *myGeneratorMethod() {
+             // ···
+             }
+         };
+     以上是 Gnerator 函数作为对象属性的两种写法
      
+
+Generator 函数的 this 值
+    为什么 Generator 需要this， 一般方法和构造函数需要知道他们的调用上下文。
+    
+    1. Generator 函数无法作为构造函数使用， 因此无法获得内部的 this 对象。
+       因为 Generator 中的 this 在不指定的情况下指向的 window 对象 
+    2. 获得 this 对象的两种方法： 
+           a.  function *foo(){
+                    yield this.a = 1
+                    yield this.b = 2
+               }
+               let obj = {};
+               let ff = foo.call(obj);
+               ff.next();   
+               ff.next(); 
+               consoloe.log(obj);
+           //  obj = {
+                   a:1
+                   b:2
+               }
+            b.  function *foo(){
+                    yield this.a = 1
+                    yield this.b = 2
+               }
+               let ff = foo.call(foo.prototype);
+               ff.next();   
+               ff.next();
+               consoloe.log(ff);
+            // ff = {
+                    a: 1
+                    b: 2
+               }
+            b 方法实现的方式是因为， 返回的 ff 对象是 Generator 函数的实例，且其继承了 Generator
+              函数的 prototype 属性
+              
+          c. function* gen() {
+                  this.a = 1;
+                  yield this.b = 2;
+                  yield this.c = 3;
+                }
+
+                function F() {
+                  return gen.call(gen.prototype);
+                }
+
+                var f = new F();
+
+                f.next();  // Object {value: 2, done: false}
+                f.next();  // Object {value: 3, done: false}
+                f.next();  // Object {value: undefined, done: true}
+
+                f.a // 1
+                f.b // 2
+                f.c // 3
+      
+yield* 表达式
+    1. yield 表达式解决嵌套在内部的 Generator 函数需要手动在内部调用的问题 
+    function *foo1(){                        function *foo1(){
+      yield a=1;                                  yield a=1;
+      yield b=2;                                  yield b=2;
+    }                                        }
+
+    function *foo2(){                        funciton *foo2(){   
+      yield c=3;                                  yield c=3
+      yield *foo1();                              let v= foo1()
+      yield b=4;                                  yield foo1.next().value
+    }                                             yield foo1.next().value
+                                                  yield b=4
+                                             }
+    let f = foo2();
+    console.log(f.next())
+    console.log(f.next())   // 调用 foo1
+    console.log(f.next())   // 调用 foo1
+    console.log(f.next())
+    
+    function* concat(iter1, iter2) {
+            yield* iter1;
+            yield* iter2;
+    }    
+    先打印完iter1 、 再打印iter2
+
+   2. yield* 表达式返回一个迭代器对象
+      a. yield* string
+      b. yield* [1,2,3]
+      当调用next方法时，返回的值是‘s’、 1 而不是整个值
+      
+   3. 嵌套的Generator函数如果有return语句则， return的返回值需要赋值给变量从而获得
+       function* foo() {
+              yield 2;
+              yield 3;
+              return "foo";
+        }
+        function* bar() {
+          yield 1;
+          var v = yield* foo();       // 若未定义变量v则， return值不会被捕获
+          console.log("v: " + v);
+          yield 4;
+        }
+      
+   4. 任何数据结构只要具有 Iterator函数接口，都可以使用 yield*遍历
+   
+   5. yield* 表达式解构嵌套数组
+   function* iterTree(tree) {
+      if (Array.isArray(tree)) {
+        for(let i=0; i < tree.length; i++) {
+          yield* iterTree(tree[i]);
+        }
+      } else{
+        yield tree;
+      }
+   }
+    const tree = [ 'a', ['b', 'c'], ['d', 'e'] ];
+
+   a.  [...iterTree(tree)]
+   
+   b.  for(let x of iterTree(tree)) {
+          console.log(x);
+        }
+
+Generator 状态机
+     1. Generator 不需要依靠内部状态位去更替状态
+    ES5状态机：                         ES6状态机:
+        var clock = function(){              var clock = function *(){
+           if(ticking)                           while(true){
+             console.log('Tick');                  console.log('Tick');
+           else                                    yield;
+             console.log('Tock');                  console.log('Tock');
+           ticking = !ticking;                     yield;
+        }                                        }
+                                             }
+    2. 不需要保存外部变量ticking，【简洁】，【安全】（状态不会被非法篡改）、【符合函数式编程的思想】，        写法上【优雅】。Generator 之所以可以不用外部变量保存状态，是因为它本身就包含了一个状态信息，即
+       目前是否处于暂停态。   状态1 - yield暂停 - 状态2
+           
+
+Generator 函数的上下文：
+     1. Generator 函数在第一次调用时会产生一个执行上下文， 即入栈
+     2. Generator 函数在遇见第一个 yield 命令时会退出当前堆栈，并冻结
+        当前所有变量的值， 下次再次调用 next() 方法时上下文环境会重新加入
+        栈中。
+  
+Generator 应用        
+    
+    1. 异步操作的同步化表达
+    
+    2. 控制流管理
+    
+    3. 部署 Iterator 接口
+    
+    4. 作为数据结构
 ```
 
-Effective Java
+#### Async
+
+```javascript
+Generator 的语法糖：  
+     1. async 代替 * 声明  
+     2. await 代替 yield， 执行后面 Promise 的同步部分，并阻塞后面执行， 直到 Promise 状态改变。
+     3. 内置执行器， 不需要人为调用 next 执行
+     4. 返回一个 Promise， 其详细状态未知
+     5. 返回的 Promise 需要等内部 await 后的所有 Promise 状态改变才会发生状态改变。
+     6. 一旦 await 后有一个 Promise 发生错误 ， Async 停止执行抛出错误，可被外部 catch 捕捉。
+     7. 在内部使用 try-catch 语句块， 或者 Promise后跟 catch 可以阻止全局停止。
+
+async function main() {
+  try {
+    const val1 = await firstStep();
+    const val2 = await secondStep(val1);
+    const val3 = await thirdStep(val1, val2);
+
+    console.log('Final: ', val3);
+  }
+  catch (err) {
+    console.error(err);
+  }
+}
+```
+
+#### 事件代理
+
+```javascript
+<ul id='manager'>
+  <li> son1 </li>
+  <li> son2 </li>
+  <li> son3 </li>
+  <li> son4 </li>
+</ul>
+
+<script>
+  普通写法： 
+        window.onload=function(){
+            const ulNode = document.getElementById("list");
+            const liNodes = ulNode.children;
+            for(var i=0; i<liNodes.length; i++){
+                liNodes[i].addEventListener('click',function(e){
+                    console.log(e.target.innerHTML);
+                }, false);
+            }
+        }
+        
+  事件代理：全权交给 ul 元素
+        window.onload=function(){
+        const ulNode=document.getElementById("list");
+        ulNode.addEventListener('click', function(e) {
+            /*判断目标事件是否为li*/
+            if(e.target && e.target.nodeName.toUpperCase()=="LI"){
+                console.log(e.target.innerHTML);
+            }
+        }, false);
+    };
+</script>
+
+事件的常用属性：
+   event.type
+   event.target
+   event.currentTarget
+   event.bubbles
+   event.eventPhase
+   
+document.addEventListener(‘event’, cb, options):
+     1.  可以定义多个同类型事件不同的回调函数，依次执行。
+     2.  在一个节点上可以定义不同类型事件的回调函数。
+     3.  event.stopPropagation() 阻止当前事件的向上或者向下冒泡或者捕获
+     4.  event.stopImmediatePropagation() 阻止当前及之后同类型事件的冒泡或者捕获。
+```
+
+
+
+### Effective Java
 
 #### 函数
 
