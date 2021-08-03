@@ -198,3 +198,58 @@
         
      
 ```
+
+### CSS 重点
+
+#### 布局
+
+```
+1. Flex 布局
+   
+   a. 父元素 display:flex 将父元素声明为弹性盒，子元素成为弹性元素，瓜分占用父元素的剩余空间
+   
+   b. 子元素使用 flex 属性决定其： 扩张、 收缩、 初始大小。 flex 属性是：
+                 flex-grow、 flex-shink、 flex-basic 三个属性的集合
+        I. flex-grow: 决定元素的扩张
+             (1) 默认值 0； 即使有剩余空间也不压缩
+             (2) 数值： x*a/(a+b+c)    x是剩余空间大小， a，b,c 是比例
+                 当元素宽度确定， 通过扩张padding 去扩宽元素宽度
+      
+       II. flex-shink: 决定元素的收缩
+             (1) flex 容器默认不换行， 当子元素宽度超过了父元素宽度， 该属性决定元素的收缩。
+             (2) 计算方式：  a,b,c 是收缩权重
+                 首先计算加权和： sum = a*w1 + b*w2 + c*w3
+                 次要计算压缩率： p1 = a*w1/sum  p2 = b*w2/sum  p3 = c*w3/sum
+                 最后计算压缩宽： x*p1 x*p2 x*p3    x 是超出的长度
+             (3) flex-shink 默认值是 1
+             (4) flex-shink 值小于 1 导致收缩不完全， 是因为压缩空间小了
+                 x = x*(a + b + c)/1
+             
+       III. flex-basic: 决定元素的起始大小  默认值是 auto
+              (1) :auto  则会根据元素 width 或者其内容宽度
+              (2) 当同时具备 width 和 flex-basic 从渲染角度会选择 flex-basic 的值
+              (3) flex-basic: xxpx;
+              
+       IV.  flex 默认值 0 1 auto
+            flex：none 0 0 auto
+            flex: auto 1 1 auto
+             
+   c. 元素的布局：
+        I. 父元素设置 flex-direction：row|row-reverse|column|column-reverse 决定主轴方向
+                       (默认是流的方向：按行布局从左到右)
+       II. 父元素设置 flex-wrap： wrap | nowarp(默认)
+       
+       III. 设定子元素的对齐方式： 
+           (1) justify-content: 主轴的对齐方式
+           
+           (2) align-item
+                  flex-start |flex-end| baseline | stretch| center 
+                  
+           (3) align-content： 只针对多行起作用
+           
+           (4) align-self: 使用于子元素上，会默认覆盖align-item
+                   auto | flex-start |flex-end| baseline | stretch| center 
+             
+      
+```
+
