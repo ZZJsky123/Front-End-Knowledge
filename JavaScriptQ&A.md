@@ -28,7 +28,7 @@
  
    【作用域】： 函数作用域、 块级作用域、 全局作用域、 对象作用域(with)
    
-   [块级作用域中的函数声明]： 块级中的函数声明用表达式去代替
+ [块级作用域中的函数声明]： 块级中的函数声明用表达式去代替
    
 
    
@@ -247,8 +247,10 @@ let 和 const命令：
      1. set ThisBinding: if [Strict] set ThisBinding to thisArg
      2. else if thisArg is null or undefined,  ThisBinding -> global
      3. else if thisArg is not object , set ThisBinding -> ToObject(thisArg)
-     4. else set ThisBinding -> thisArg                                            5. loalEnv = new DelcarativeEnvironment([[Scope]])            
-     6. Set the LexicalEnvironment to localEnv.                                    7. Set the VariableEnvironment to localEnv.
+     4. else set ThisBinding -> thisArg                                            
+     5. loalEnv = new DelcarativeEnvironment([[Scope]])            
+     6. Set the LexicalEnvironment to localEnv.                                   
+     7. Set the VariableEnvironment to localEnv.
      8. Let code be the value of F’s [[Code]] internal property.
      9. Perform Declaration Binding Instantiation using the [function code]
 
@@ -277,9 +279,6 @@ let 和 const命令：
 由上述步骤可知：【函数名】 和 【变量名】 重名， 由于函数名标识符已经存在，所以变量不
              会再被创建。 
 函数中收集的标识符： 函数声明， arguments， var声明的标识符
-     
-     
-        
 ```
 
 ## 对象
@@ -628,12 +627,14 @@ Effective JavaScript：
 
 ```
 JS 四种对象：
+
     native object: ECMAScript 定义且独立实现与宿主环境无关。 
                               ： Object、 Function、Array、Date、 RegExp、 Number
                                  Boolean、 String、 Error、EvalError、RangeError、
                                  ReferenceError、 SyntaxError、 TypeError、 URIError
+                                 
     built-in object: ECMAScript 定义且独立实现与宿主环境无关，程序运行时无须手动初始化。
-    【Only ONE】： global 对象
+                      【Only ONE】： global 对象
                       value properties of global : NaN、Undefined、Infinite                                                              NUll
                       Function properties of global :
                                                    eval(x) 、 isNaN(number)、  
@@ -645,6 +646,7 @@ JS 四种对象：
                           decodeComponentURI(encodedURIComponent)
                                                    
                          Constructor properties of global: native Object
+                         
     注：  eval(x)在执行时若 x 不是 string 直接返回x
         2. URI:Uniform Resource Identifiers, or URIs, are Strings that identify 
             resources (e.g. web pages or files) and transport protocols by which to 
@@ -665,7 +667,6 @@ JS 四种对象：
              var i = name.slice()   隐式
 后台会自动创建基本类型对应的对象，当调用方法后该对象会被自动回收
       拆箱： 引用类型转换为基本类型值
-      
       发生拆箱的场所： 对象参与进行运算， 需要得到对象的 primitive value
       
 隐式类型转换：
@@ -692,8 +693,9 @@ JS 四种对象：
                  5. String 与 number 类型比较， String 会转化为 number类型
                  6. Boolean 与 其他类型相比较， 会首先转化为 Number 类型
                  7. 基本类型 与 引用类型相比较， 引用类型首先使用 toPrimitive 获得基本类型值
-                     [] == ![]  ->  true, 因为[]被转换成0， 而不是先转boolean逻辑为true。
-                  [undefined] 调用valueOf() 返回对象， 再调用 toString() 返回“”
+                 
+                 [] == ![]  ->  true, 因为[]被转换成0， 而不是先转boolean逻辑为true。
+                 [undefined] 调用valueOf() 返回对象， 再调用 toString() 返回“”
        toPrimitive 调用顺序： valueOf() --> toString(), 依然失败返回 TypeError
        
   对象类型转换为基本数据值：
@@ -705,7 +707,7 @@ JS 四种对象：
             ["abc"]         true       NaN      "abc"
             
  总结： 基本数据类型都具备 valueOf()方法 、 toString()方法。 valueOf方法返回 primitive 值
-      主要是在使用这些对象时方便获取基本值。 然后所有对象都拥有转换为字符串的方法。
+       主要是在使用这些对象时方便获取基本值。 然后所有对象都拥有转换为字符串的方法。
 
 1. 对象的属性类型： 数据类型、 访问器类型、  内部属性
 2. 对象属性的Attribute： Value、 Writable、 Configurable、 Enumerable、 Get、 Set
@@ -765,15 +767,123 @@ JS 四种对象：
                     .entries()              // 返回迭代器， value：[索引， 键值]
                     .keys()                 // 返回迭代器， value:key
                     .values()               // 返回迭代器， value：value
-                    .copywithin(target, start, end=this.length) // 复制元素到指定位置
-                
-                    
-                    
-                    
-                    
+                    .copywithin(target, start, end=this.length) // 复制元素到指定位置      
 ```
 
+## 基础
 
+```
+1. JavaScript 7个 基本类型：
+   a. null              空值
+   b. undefined         未定义
+   c. number
+   d. boolean
+   e. string
+   f. object
+   g. symbol
+   
+2. 类型检测：
+   a. typeof  可以检测出来： undefined、 number、 boolean、 string、 function、 object
+   b. typeof 会将 null 检测成 object  因此识别 null 可以用 ===  
+   c. instanceof 用于识别对象类型， 即左边对象的原型链中是否存在右边构造函数的原型
+   d. Object.prototype.toString.call(obj) 返回："[object Native object]" 
+   e. 检测 NaN 和 Finite 用全局方法： isNaN()、 isFinite()
+   f. 检测数组除了使用 instanceof 也可以使用 isArray() 函数
+   
+  总结： typeof 用于检测7个基本数据类型， 其中 null 的检测要使用全等符号
+        Object.prototype.toString.call 用于检测所有 native object
+   
+3. 类型转换
+   
+   a. + 中涉及到的类型转换：
+       I： string + any 时， any会转换成string， 并发生字符串拼接。
+       II. number + 非引用类型， 非引用类型会转换成 number
+       III. number + 引用类型， 两边都转为 string
+       IV.  若两边全是对象类型， 两边同时调用自己的 toString() 函数进行拼接。
+   注： {}.toString()  [object Object]
+       []. toString()  ""
+       fun.toString()  "function(){}"
 
+   b. == 中涉及的类型转换
+      I. null 和 undefined    null == undefined：true, null/undefined == any: false
+     II. NaN == any : false
+     III. Number == String   String 会被转化成 Number
+          boolean == any     boolean 会首先转化为 Number
+          基本类型 == 引用类型  引用类型 会调用toPrimitive() 获取基本类型值
+     Iv： 引用类型 == 引用类型  比较地址，若比较不同地址上的对象是否相等，需要人为自己定义
+     
+4. 原型：每个对象上都有一个内部属性 __proto__, 其值是一个对象，被称作对象的原型对象，原型对象
+        上也具备 __proto__ 属性， 因此形成了一条原型链， 原型链的终点是 Object.prototype
+        的内部属性 __proto__, 其值为 null。通过原型链实现继承。
+        
+   a. 对象的原型存储在 _proto_
+   b. 函数的原型存储在 prototype
+   c. 在原型对象上储存着 contructor 属性，其值：fun ，指出用于当前构造对象的构造函数。
+   d. 可以通过 Object.getPrototypeOf(obj) 获取 obj 对象的原型
+   e. 可以通过 Object.setPrototypeOf(obj, proto)  设置 obj 对象的原型。
+   f. new Fun(): Fun 为构造函数， 其会生成一个空白对象obj， obj.__proto__ = Fun.prototype
+      并将该对象作为 this 值传入函数， 若无其他引用类型返回，则返回该对象。
+      
+      
+5. 宏任务 与 微任务
+   
+   a. 主线程执行完,会先访问微任务事件队列， 将微任务队列中的所有函数压入主线程中执行
+      当所有微任务执行完后，会访问宏任务队列， 将一个宏任务压入主线程中执行， 执行完毕
+      进入下一个周期。
+      
+   b. 常见的微任务：Promise   MutationObserver()
+   
+   c. 常见的宏任务： setTimeout()    setInterval()
+   
+   e. 执行流程：  主线程任务 -> 所有微任务 -> 从宏任务队列中读取一个宏任务。
+```
 
+## 重点
+
+```javascript
+1. 继承： 构造函数的方法置放在 prototype 属性上， 继承属性置放在传入的 this 对象上， 此时
+         子类的实例对象共同拥有一份父类方法， 各自独立拥有一份父类属性。
+   function Parent(){
+      this.pro1 = 'xxx';
+  }
+   Parent.prototype.fun1 = function(){};
+   function Child(){
+       Parent.call(this);
+   }
+   child.prototype = (function(){
+     function F1(){};
+     F1.prototype = Parent.prototype;
+     return new F1();
+   }());
+   Chile.prototype.constructor = Child;
+   let kid = new Child();
+
+2. 闭包原理： 执行当前函数会创建执行上下文， 并将当前函数压入到执行栈中， 开始执行时会调用NewDeclativeEnvironoment([[scope]])， 该函数会创建一个词法环境， 该词法环境有一个 属性用于指向
+外部的作用域， 该值是传进去的参数 [[scope]]。 该词法环境会被赋值给 作用域中 LexcialEnvironment 和
+variableEnvironment， 在 ES5 中， 函数声明 和 变量声明都记录在 variableEnvironment 中， 而ES6 中
+variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的词法环境对外部作用域的引用，使得内部函数可以操作和使用外部函数的作用域和变量。
+
+3. Promise：
+
+   a. Promise 异步编程方案， 其提出背景是解决第三方异步函数不信任问题， 回调地狱写法复杂问题
+      Promise 的特点是： 控制反转、 状态唯一、 链式调用。
+      
+   b. 新建 Promise 实例， 输入参数为一个执行器： new Promise( executor )
+      执行器是一个函数，其接受两个参数 resolve 和 rejected， 其作用是执行异步
+      事件逻辑， 当事件完成后，改变当前 Pending 状态， 并将事件结果送给 resolve
+      或者 reject 函数 ， 触发事件的回调函数。
+      
+   c. 事件回调函数定义在 then 方法中， then((res) =>{
+                         // 定义事件触发成功时执行逻辑
+                   }, (err) =>{
+                        // 定义事件失败时执行的逻辑
+                   })
+      then 方法一定会返回一个 Promise， 当回调函数返回一个 Pormise 则 then 方法将其返回
+      若回调函数返回一个基本数据类型 then 方法将其包装成 Promise 并将 Promise 的值设定为
+      当前值；若回调函数无返回值， 则自动调用 Promise.resolve() 新的 Promise 的值是undeined。
+      
+   d. then 方法中输入值若不是函数， 则会发生穿透，即将第一个有值的 Promise 传递给下一个 then 方法
+   
+   e.  等...完成， 我再...   （我再后面的内容一定是放入在 then 中的）。
+```
 
