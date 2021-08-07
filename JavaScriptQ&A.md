@@ -807,7 +807,7 @@ JS 四种对象：
         
 2. 类型检测：
    a. typeof  可以检测出来： undefined、 number、 boolean、 string、 function、 object
-   b. typeof 会将 null 检测成 object  因此识别 null 可以用 ===  
+   b. typeof 会将 null 检测成 object 因此识别 null 可以用 ===  
    c. instanceof 用于识别对象类型， 即左边对象的原型链中是否存在右边构造函数的原型
    d. Object.prototype.toString.call(obj) 返回："[object Native object]" 
    e. 检测 NaN 和 Finite 用全局方法： isNaN()、 isFinite()
@@ -846,9 +846,26 @@ JS 四种对象：
    e. 可以通过 Object.setPrototypeOf(obj, proto)  设置 obj 对象的原型。
    f. new Fun(): Fun 为构造函数， 其会生成一个空白对象obj， obj.__proto__ = Fun.prototype
       并将该对象作为 this 值传入函数， 若无其他引用类型返回，则返回该对象。
+   g. Fun.__proto__ = Function.prototype  其类型是一个函数
       
-      
-5. 宏任务 与 微任务
+5. 创建对象的三种方式：
+        var obj = {};       // 创建一个空对象，obj.__proto__ = Object.prototype
+        var obj = new Fun() // 创建 Fun 的实例对象， obj.__proto__ = Fun.prototype
+        var obj = Object.create(原型对象， 新的对象属性描述) 
+                           // 使用 Object.create 创建一个新对象，新对象的原型是函数的第一个参数
+        e.g: var obj = Object.create(p, {'name':{value: xx
+                                                 writable:xx
+                                                },
+                                          'age': {
+                                             value:xx
+                                             writable:xx
+                                          }
+                                         
+                                         })
+              var obj = Object.create(null)  //  obj.__proto = null;
+        
+     
+6. 宏任务 与 微任务
    
    a. 主线程执行完,会先访问微任务事件队列， 将微任务队列中的所有函数压入主线程中执行
       当所有微任务执行完后，会访问宏任务队列， 将一个宏任务压入主线程中执行， 执行完毕
@@ -878,7 +895,7 @@ JS 四种对象：
      F1.prototype = Parent.prototype;
      return new F1();
    }();
-   Chile.prototype.constructor = Child;
+   Child.prototype.constructor = Child;
    let kid = new Child();
 
 2. 闭包原理： 执行当前函数会创建执行上下文， 并将当前函数压入到执行栈中， 开始执行时会调用NewDeclativeEnvironoment([[scope]])， 该函数会创建一个词法环境， 该词法环境有一个 属性用于指向
@@ -1201,5 +1218,69 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
                 c()
             }
             解释： a 必须等 b 运行完才可以向下运行， 因此 b 运行完依然处于 a 的运行栈中。
+    
+8. ES6 类语法
+
+       a.  class A {}            
+
+       b.   xx = 1;                 // 实例属性开头顶格写
+            xx = 2;
+
+       c. 构造器函数： constructor(){             
+                        thix.xx = a        // this 指针指向类实例。
+                     }  
+
+       d. 实例方法： Method1(){       // 不需要 function 变量， 方法都在类的 prototype 上
+                                    //  且不可枚举
+                   }
+
+       c. 静态方法： statci Method3(){        // 静态方法
+                       this.xx = a;         // this 指针指向类，而非实例
+                   }
+
+       d. 读取器和存储器： get name(){              // 获取器 getter
+                        }
+                        set name(){              // 存储器 setter 
+                        }    
+          等价于使用 Object.defineProperty(obj, pro, {..})
+
+       e. 私有属性和方法： ES6 没有明确的私有属性和方法提案
+                I. 约定俗称： 变量名和方法名在开头有一个 _ 则说明此只在内部使用，但是外部依然可以
+                            访问到。
+                II.  在 class 外部定义方法和变量名
+                III. 方法和属性名使用 Symbol
+
+       f. 
+           I. 类名可以在当前类使用， 指代当前类。
+          II. 类必须使用 new 运算符
+          III. 可以采用表达式的方式定义方法 [argName](){}   argName 是 String 类型或者 Symbol
+          
+      类继承：
+          
+       g. class B extends A{        super 只有在构造器中可以作为函数使用， 且必须使用
+               constructor(){
+                   super()          // 子类的 super 在构造器中作为函数使用，该函数代表父类的构造函数
+                   super.x = 3;
+                   console.log(super.x); // undefined 相当于访问： A.prototype.x
+                   console.log(this.x); //  3 
+               }         
+          }
+          调用 super 返回的依然是 B 的实例对象， super = A.prototype.constructor.call(this)
+          即 super 内部的 this 指向当前实例。
+          
+      
+       h.  调用 super 作为对象时， super = A.prototype , 可以在继承的方法中使用 super 调用父类方法
+           但父类的实例属性无法访问。
+   
+       l.  class A {}   class B extends A{}
+           B.__proto__ = A                        // B 的原型是 A
+           B.prototype.__proto__ = A.prototype    // B.prototype 的原型是 A.prototype 
+           上述等价于 Object.setPrototypeOf(B, A)
+                    Object.setPrototypeOf(B.prototype, A.prototype)
+
+           class A{}    若 A 是基类，无继承
+           A.__proto__ = Function.prototype      // A 是一个函数其原型是 Function.prototype
+           A.prototype.__proto__ = Object.prototype;  
+           注： Function.prototype 是一个函数。
 ```
 
