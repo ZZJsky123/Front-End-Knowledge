@@ -250,6 +250,115 @@
            (4) align-self: 使用于子元素上，会默认覆盖align-item
                    auto | flex-start |flex-end| baseline | stretch| center 
              
-      
+2. 2D transform:   rotate  | scale | translate | skew 
+        
+        a. transform:rotate(90deg): 相对于物体的中心点进行原地旋转， 正数是瞬时针旋转， 负数是逆时针
+        
+        b. transform:scale(x, y): 相对于物体的中心点对x轴和y轴分别进行压缩，(1,1) 原比例， <1 压缩
+           > 1 扩张， 压缩数值只能是数值，不能是百分比或者px
+           
+        c. transform:translate(px|%, px|%) 相对于物体的中心点移动， px 是移动绝对距离， % 相对于
+                     物体的宽度和高度进行百分比移动。
+                     
+        d. transform: skew(xdeg, ydeg)  
+        
+        e. 级联调用： transform: translate(x,y) rotate(30deg) :  按照调用顺序先平移， 平移到
+                    指定位置后进行中心旋转。
+                    
+3. animation : 动画
+         
+         a. 定义动画名字 & 起始 & 终止
+               @keyframes name {
+                      from {
+                         transform: translate(0,0) rotate(0deg);
+                      }
+                      to {
+                         transform: translate(300px,300px) rotate(90deg);
+                      }
+               
+               }
+               
+          b. 定义动画过程： 持续时间 | 变化函数 | 动画开始的延迟时间 | 重复执行次数 | 方向 | 名字
+              I. animation-duration:  持续时间， 单位为s ，配合变化函数计算出单位时间的变化量
+              
+              II.animation-timing-function:变换函数， ease | ease-in | ease-out | linear
+                                                    step-start | step-end
+              
+              III.animation-delay: 动画开始的时间
+              
+              IV. animation-interation-count： number | infinite 一直重复
+              
+              V. animation-direction: normal | reverse | alternate | alterate-reverse
+                                      开始动画的位置， normal：从左向右 | reverse: 从右向左
+                                      alterate： 左向右 - 右向左
+              
+              VI. animation-name: name
+              
+              VII. animation-play-state: running | paused
+              
+  4. 3D transfrom:
+  
+             a. rotate3d:
+                   I. roataeX(xdeg) :  绕 x 轴旋转  [推倒]  
+                   
+                   II. rotateY(xdeg)： 绕 y  轴旋转  [钢管]
+                   
+                   III. rotateZ(xdeg)： 摩天轮
+                   
+            b. translate3d:
+                   I. translateX(px) :  
+                   
+                   II. translateY(px):
+                   
+                   III. translateZ(px): 将物体拉远或者拉近， 太大超过所设置的视点物体看不见 
+                                        太远物体也看不见。
+                                        
+            c. perspective: 视点 | px
+            
+            d. transform-style: flat | preserve-3d
+            
+ 5. 实现旋转木马图
+   <div class='stage'>
+  <div class ='container'>
+    <img src="https://img.iplaysoft.com/wp-content/uploads/2019/free-images/free_stock_photo.jpg">
+    <img src='https://pic1.zhimg.com/v2-4bba972a094eb1bdc8cbbc55e2bd4ddf_1440w.jpg'>
+    <img src='https://img95.699pic.com/photo/50046/5562.jpg_wh300.jpg'>
+    <img src='https://pic3.zhimg.com/v2-3b4fc7e3a1195a081d0259246c38debc_1440w.jpg'>
+  </div>
+</div>
+img{
+  width: 158px;
+  height:100px;
+  position: absolute;
+}
+
+img:nth-child(1) { transform: rotateY(   0deg ) translateZ(84px); }
+img:nth-child(2) { transform: rotateY(  90deg ) translateZ(84px); }
+img:nth-child(3) { transform: rotateY(  -90deg )translateZ(84px); }
+img:nth-child(4) { transform: rotateY(  360deg )translateZ(84px); }
+
+.stage{
+  perspective: 600px;
+  margin: 0px 200px 0px;
+  position:relative;
+  
+}
+.container{
+  width: 500px;
+  height:400px;
+  transform-style:preserve-3d;
+  position:absolute;
+  top:50px;
+  animation: 4s linear 0s infinite noraml rotate; 
+}
+
+@keyframes rotate{
+  from{
+      transform: rotateY(0);
+  }
+  to{
+      transform: rotateY(360deg);
+  }
+}
 ```
 
