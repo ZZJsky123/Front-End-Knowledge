@@ -782,6 +782,29 @@ JS 四种对象：
    f. object
    g. symbol
    
+   Symbol： 定义独一无二的值， 提出背景主要解决混入第三方对象名字冲突的问题， 使用 Symbol('descriptor')
+            描述会创建一个独一无二的值， descriptor 是描述符， 即使多处创建描述符相同的 Symbol 他们的
+            值也不会相同。 Symbol('descriptor') 生成的值一旦没有被变量捕捉，则无法被搜索到。
+            
+        a.  let s1 = Symbol()    Symbol 的创建形式， 不能使用 new 操作符。
+            console.log(s1) // Symbol()
+            s1.toString() // 'Symbol()’
+        
+        b.  let a = {[s1]: val }  Symbol 作为属性访问和赋值必须使用 []。
+        
+        c.  Symbol 不能进行 + - 运算
+        
+        d.  Symbol 作为属性不能被 for...of、 for...in 、 Obj.keys() 、
+            Object.getOwnPropertyNames() , Json.Stringify() 返回
+            使用 Object.getOwnPropertySymbols() 访问
+        
+        e.  Symbol.for('descriptor'):  在全局注册 Symbol 值，并将该值返回
+            使用 Symbol.for() 会在全局(即使当前环境不是全局)检查是否有该 Symbol
+            如果有则返回该值并赋值给变量， 若没有则注册该描述符。
+            Symbol.keyFor(变量)  返回 Symbol 值的描述符。
+        
+        f. 单例模式：调用一个类， 任何时候返回的都是同一个实例。
+        
 2. 类型检测：
    a. typeof  可以检测出来： undefined、 number、 boolean、 string、 function、 object
    b. typeof 会将 null 检测成 object  因此识别 null 可以用 ===  
@@ -850,11 +873,11 @@ JS 四种对象：
    function Child(){
        Parent.call(this);
    }
-   child.prototype = (function(){
+   child.prototype = function(){
      function F1(){};
      F1.prototype = Parent.prototype;
      return new F1();
-   }());
+   }();
    Chile.prototype.constructor = Child;
    let kid = new Child();
 
@@ -863,7 +886,80 @@ JS 四种对象：
 variableEnvironment， 在 ES5 中， 函数声明 和 变量声明都记录在 variableEnvironment 中， 而ES6 中
 variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的词法环境对外部作用域的引用，使得内部函数可以操作和使用外部函数的作用域和变量。
 
-3. Promise：
+4. 模块化：
+      a. 模块化的核心： [量小]、[组织良好] 的代码比庞大的代码更具有理解性和可维护性，避免全局污染和提高
+                      代码的重用性。
+      
+      b. 立即执行函数实现模块化：  
+               function MouseClickCounts = function(btn){
+                   const clickCount = 0;                           // 模块的私有变量
+                   const handleclick = function(){ clickCount++ }; // 模块的私有函数
+                   
+                   return {                           // 返回对象，对象具有 clickControl 接口
+                       clickControl: () => {
+                           btn.addEventListener('click', handleclick);
+                       }
+                   }
+               }();
+
+           模块扩展：
+                (function modle(model, btn){
+                  const wheelCount = 0;
+                  const handlewheel = function(){ wheelCount++ }
+                  
+                  model.controlWheel = () =>{
+                      btn.addEventListener('wheel', handleWheel);
+                  }
+                })(MouseClickCounts)
+           缺点： 模块依赖问题。
+           
+      c. AMD 解决方案： 设计理念明确基于浏览器  require.js 和 curl.js 实现 AMD 标准
+             I. deine('模块名'， ['模块依赖列表']， 模块函数) 模块函数中的返回对象作为
+                导入时使用的接口。
+             
+             II. 一个文件可以定义多个模块， 自动收集模块依赖， 依赖是异步加载不会阻塞之后的程序
+             
+             III.require(['模块名列表']， callback): 导入依赖模块，导入成功后触发回调。
+             
+             IV. require 加载模块列表默认是这些模块与当前文件在同一个文件夹下， 若不在
+                 需要在当前文件顶部设置 ： require.config = {
+                     
+                                          baseUrl: '基路径'   Path 会在当前路径下查找    
+                                          paths: {
+                     
+                                               '模块名'： （基路径/)lib/xx.js
+                                           }
+                                      }
+             
+      d. CommonJs： 同步加载模块 Node.js 使用人数最多
+             I. 一个文件只能定义一个模块
+
+             II. require('模块路径'): 导入依赖模块
+             
+             III. module.exports = 文件中需要导出的变量或者函数 
+
+             IV.  服务器端可以使用同步加载模块， 因为模块都存储在本地，运行时可以先行读取
+                  读取的快慢取决于硬盘速度， 而浏览器不能使用同步加载，因为其读取的快慢取
+                  决于网络
+             
+             V. 例子：      const $ = require("jQuery");
+                            let numClicks = 0;
+                            const handleClick = () =>{
+                                alert(++numClicks);
+                            };
+
+                            2. 定义公共接口
+                            module.exports = {
+                               countClicks: () => {
+                                  $(document).on("click"， handleClick);
+                               }
+                            };
+
+                            在另个一文件中：
+                            const MouseCounterModule = require("MouseCounterModule.js")
+                            MouseCounterModule.countClicks();
+
+4. Promise：
 
    a. Promise 异步编程方案， 其提出背景是解决第三方异步函数不信任问题， 回调地狱写法复杂问题
       Promise 的特点是： 控制反转、 状态唯一、 链式调用。
@@ -884,6 +980,226 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
       
    d. then 方法中输入值若不是函数， 则会发生穿透，即将第一个有值的 Promise 传递给下一个 then 方法
    
-   e.  等...完成， 我再...   （我再后面的内容一定是放入在 then 中的）。
+   e.  等...完成， 我再...   （我再后面的内容一定是放入在 then 中的。
+   
+   f. 使用 Promise 注意：
+       a. exuctor 中的 resolve 函数 如果接受到是一个 Promise 对象， 会等 Promise 对象决策
+          完成后再触发 then 函数。
+   
+   g. Promise.prototype.Method:
+          I. Promise.prototype.all: 函数输入一个 Promise Iterator， 返回一个 Promise ，Promise
+                                    的值是一个数组(记录所有 Promise 的值)或者是一个 err 信息
+                 
+              Promise.prototype.all = function(arr){
+                  
+                  if(!arr[Symbol.iterator] && typeof arr[Symbol.iterator] != 'function'){
+                      throw new Error('')
+                  }
+                  
+                  let res=[], len=0;
+                  return new Promise((resolve, reject) => {
+                      for (let i of arr){
+                          Promise.resolve(i).then((r) =>{
+                              res[len++] = r;
+                              if(len == arr.length ){
+                                   resolve(res);       
+                              }
+                          }, (err) => {
+                              reject(err);            // 任意一个出错立即返回
+                          })
+                      }
+                  })
+                  
+              }
+
+         II. Promise.prototype.race： 迭代器中只要任意一个 Promise 改变状态， 返回的 Promise 立即
+                                      改变状态。
+                Promise.prototype.race = function(arr){
+                  
+                 if(!arr[Symbol.iterator] && typeof arr[Symbol.iterator] != 'function'){
+                      throw new Error('')
+                  }
+                  
+                 return new Promise((resolve, reject) => {
+                     
+                     for(let i of arr){
+                         Promise.resolve(i).then((res) => {
+                             resolve(res)
+                         }, (err) => {
+                             reject(err);
+                         })
+                     }
+                 })
+                    
+                }    
+
+         III. Promise.prototype.any : 与 all 方法相反，如果迭代器中任意一个 Promise 状态改为
+                                      fullfilled 返回的 Promise 对象状态改变。 若所有 Promise
+                                      都拒绝，则将错误信息作为返回的 Promise 的值。
+              Promise.prototype.any = function(arr){
+                 if(!arr[Symbol.iterator] && typeof arr[Symbol.iterator] != 'function'){
+                      throw new Error('')
+                  }
+                  
+                  let res=[], len=0;
+                  return new Promise((resolve, reject) => {
+                      for (let i of arr){
+                          Promise.resolve(i).then((r) =>{
+                             resolve(r);       
+                          }, (err) => {
+                              res[len++] = err;
+                              if(len == arr.length ){
+                                   reject(res);       
+                              }
+                          })
+                      }
+                  })
+              }
+
+          IV. Promise.prototype.try: 输入参数是一个函数， 函数可以是同步函数也可以是异步函数。
+                                     该函数会当 f 是同步函数时按照同步方式执行， 异步函数时
+                                     按照异步方式执行。
+              Promise.prototype.try = function(f){
+                  f = typeof f == 'function' ? f : () => f;
+                  
+                  return new Promise((resolve, reject) => {
+                     try{
+                         resolve(f());
+                     }catch(err){
+                         reject(err);
+                     }
+                  })  
+              }
+
+5. Iterator 对象：
+         a. 背景： 提供不同数据结构相同的遍历方法： for...of 、 ...[], 凡是实现了迭代器都可用上述
+                  方式进行判定。 
+            形式： Iterator 是一个对象，拥有 next 属性， 该属性是一个函数， 凡对象满足上述者被称为
+            迭代器对象。
+         
+         b. 
+          I. xx[Symbol.iterator] = fun , 凡是拥有 [Symbol.iterator] 属性， 且属性值是一个
+             函数，则判断数据可以迭代。
+         II. 函数返回一个 {next: next} 对象，其上有一个属性 next 函数类型，每次调用该函数返回： 
+             函数又被称为 [迭代器生成函数] 
+                              { valu：value  done：false/true }
+         
+         c. 实现 Iterator 的本地数据： Array、 Map 、 Set、 String 、 arguments
+         
+         d. for..of  、 ...Iterator  可以对迭代器进行遍历而不需要调用 next 方法
+         
+         
+6. Generator： 
+         
+         a.  Generator 是状态函数， 该函数调用后会返回一个 Generator ， 用这个对象上的 next 方法
+             去遍历函数的内部状态， 函数的内部状态定义在 yeid 后， 除去第一次遍历以外， 每次都是从
+             yeid 开始，yeid 后的状态值会被返回， 向下执行，直到遇到下一个 yeid 为止。
+             
+         b. 形式：  function * f(){
+                     let a = 1 + yeid 3
+                     return a
+                    }
+                   let iter = f()
+                   iter.next()    //  {value:3,  done:false}
+                   iter.next()    //  {value:NaN, done:true}
+            yeid 3 只告诉迭代器当前状态是 3， 但是 yeid 3 整体无返回值， 返回 undefined
+            内部 return 返回的值作为最后的 value 值， 若无 return   value：undefined
+
+        c. iter.next(value) : 向 next 送入 value 作为上一个 yeid staus 的返回值。
+           
+        d. yield 推送的状态如果用在另一个表达式之中， 必须放在圆括号里面
+           function * demo(){
+            console.log('Hello' + (yield));
+            console.log('Hello' + (yield 123));
+           }
+                  
+        e. Generator 返回一个 Generator 对象 ， 可以直接作为 [Symbol.iterator] 属性的值， 
+           Generator 中的状态作为迭代器返回的结果。 fun.prototype 存放的是 Generator 对象
+           即函数调用返回的 Generator 对象， let iter = fun.call(fun.prototype) 则 fun
+           的 this 值设置成了 Generator 对象， 添加的属性都可以在 iter 中找到。
+           
+        f. Generator.prototype.throw: 在 Generator 函数体外抛错， 在 Generator 体内捕捉
+                var g = function* () {
+                      try {
+                        yield;
+                      } catch (e) {
+                        console.log('内部捕获', e);
+                      }
+                    };
+
+                    var i = g();
+                    i.next();                  // 抛错之前必须使用一次 next 方法
+
+                    try {
+                      i.throw('a');
+                      i.throw('b');
+                    } catch (e) {
+                      console.log('外部捕获', e);
+                    }
+         i.throw() 第一次调用时， 错误会被内部的 try-catch 捕捉， 捕捉完成后若之后有 yield
+           继续运行执行下一次的 yield 后停止。 第二次再调用 i.throw()则错误只会在外部捕捉，即使
+           函数中有第二个 try-catch 也不会捕捉。 
+       
+      g. Generator.prototype.return : Generator 遍历停止函数， 将 return 作为 终值
+         done： false， 利用该函数可以在外部停止遍历器运行。
+         
+      f. yield *Generator() : 用于遍历内部的 Generator 函数， 不需要在内部手动调用 iterator 函数
+         该语法相当于： 将该行替换成    for(let val of Generator()){
+                                      yield val;
+                                   } 
+         因此外部调用相应次数的 next()， 每次都会读取 val。 但是这种语法只能在 Generator 内部使用。
+         function * concat(iter1, iter2){
+             yield * iter1
+             yield * iter2
+         }
+         for(let val concat('str1', 'str2')){
+             res.push(val);
+         }
+         res:['s','t','r','1','s', 't', 'r', '2']
+                        
+
+7. Async: ES6 异步编程方案 : Generator 语法糖
+   
+     a. async 代替 * 声明  
+
+     b. await 代替 yield， 执行后面 Promise 的同步部分，并阻塞后面执行， 直到 Promise 状态改变。
+        其返回状态改变后的 Promise 的值， await 后如果没有跟 Promise/thenable 对象则直接将该值
+        返回。一旦 await 后有一个 Promise 发生错误 ， Async 停止将该错误抛出，用外部 catch 捕捉。
+        若不想停止执行，需要内部使用 try-catch 或者 Promise 后跟 catch 可以阻止全局停止。 书写时
+        建议在内部捕获错误，从而保证函数执行完。
+        
+     c. 内置执行器， 不需要人为调用 next 执行， Async 会和普通方法一样，用一行执行。
+     
+     d. 返回一个 Promise， 其详细状态未知
+     
+     e. 返回的 Promise 需要等内部 await 后的所有 Promise 状态改变才会发生状态改变。
+     
+     f. async 的 return 返回的值，会作为返回的 Promise 值，传入到 then 的回调函数中。
+     
+     g. 注意事项：
+         I.或者 Promise后跟 catch 可以阻止全局停止
+
+                    async function main() {
+                      try {
+                        const val1 = await firstStep();
+                        const val2 = await secondStep(val1);
+                        const val3 = await thirdStep(val1, val2);
+
+                        console.log('Final: ', val3);
+                      }
+                      catch (err) {
+                        console.error(err);
+                      }
+                    }
+         II. 若前后的 await 没有关系， 可以考虑将他们同时触发
+                 写法一：  async function foo(){
+                               const res = await Promise.all([p1, p2, p3])
+                           }
+        III. async 可以保存运行栈
+            const a =async () => {
+                await b();
+                c()
+            }
+            解释： a 必须等 b 运行完才可以向下运行， 因此 b 运行完依然处于 a 的运行栈中。
 ```
 
