@@ -1,4 +1,4 @@
-## ajax
+## Ajax
 
 ```javascript
 function get(url,callback){
@@ -83,3 +83,43 @@ function post(url,data,callback){
    
 
 ```
+
+## Ajax Level 2
+
+```
+ Ajax Level 2 
+ 
+ 1. 增加 cors 机制
+ 
+ 2. 增加请求过程信息
+ 
+ 3. 设置HTTP请求时限
+ 
+ 4. 可以上传文件/ 上传和下载二进制文件
+ 
+ 5. 使用 FromeData 对象管理表单数据
+ 
+ a. 若是跨越请求， 浏览器自动增加 Origin 字段
+ 
+ b. xhr.timeout = 3000ms  设置请求时限，规定时间内未完成请求调用 xhr.ontimeout 回调函数
+ 
+ c. 增加请求过程信息：
+            I. xhr.onerror :  传输过程出错回调
+            II. xhr.loadStart: 传输过程开始回调
+            III.xhr.load:  传输过程完成回调
+            IV. xhr.abort: 传输被用户取消
+            V.  xhr.loadEnd: 传输完成但不知道具体是否成功
+            
+            xhr.onprogress:  下载过程的回调事件
+            xhr.upload.onprogress:  上传过程的回调事件
+            
+ d. FromData 对象
+             I. let formdata = new FormData()   新建一个 formdata 对象
+             
+             II. formdata.append('列名',  data)；
+             
+             III. xhr.send(formdata);    直接发送表单
+             
+             IV. new FormData(表单元素)    会将该表单元素转换为 FormData 对象
+```
+
