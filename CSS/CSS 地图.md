@@ -4,6 +4,7 @@
 1.  HTML 世界中的 CSS
   a. HTML 中任何内容都是一种内容都是一种节点， 在HTML中显示的是三种节点：
                    文本节点、 注释节点、 元素标签节点
+                   
      CSS 通过 [盒模型] 施加对三种节点添加样式： 位置布局， 内容显示
      [位置布局]： 页面生成后， 标签在页面中的位置显示
      [内容显示]： 页面生成后， 标签中的内容
@@ -13,13 +14,17 @@
      I. 由于 display: incline-block 属性， 因此每个元素其是两层盒子， 外面的盒子被称作
         外在盒子，两种类型： 块级盒子 和 内联盒子。
         
-     II. 文字又被称为匿名内联元素， 内联元素除了拥有与块级盒相同的盒子结构，其还定义如下盒子： 
+     II. 文字又被称为匿名内联元素， 内联元素除了拥有与块级盒相同的盒子结构，其还定义如下盒子：
+     
          em框： 字符大小 
+         
          内容区：相连的 em 框组成内容区， 内容区 = 背景颜色
-          行框： 每一行就是一个行框盒子， 行框盒子是由一个个 em 框组成的  
+         
+         行框： 每一行就是一个行框盒子， 行框盒子是由一个个 em 框组成的  
+         
          包含盒子： 由一行行的行框盒子组成。
          
-     III. 内联元素的行框盒子之前都有一个空白的幽灵节点，宽度为 0， 其继承元素的子体大小和
+     III. 内联元素的行框盒子之前都有一个空白的幽灵节点，宽度为 0， 其继承元素的字体大小和
           行高属性。
      
 2. HTML 中的环境
@@ -29,21 +34,25 @@
      b. 流：
           块级元素： 水平流上只显示一个，该元素自动铺满整行，当前行的流成为该块级元素的内流
                    又成为 [内河]， 在内河中可再次放置：块级元素、内联级元素。
+                   
           内联元素： 内联元素文字和图片都有默认的宽度， 其他内联元素宽度是 auto ，他们
                    摆放时都是被流引导自动摆放。
+                   
            流动性： 元素的 margin/border/padding/width 自动适配。 
-                  当我们不主动设置内河中子元素宽度， 则其会自动适应其它元素宽度的改变，这种
-                  就称为利用流体进行自动布局。
+                   当我们不主动设置内河中子元素宽度， 则其会自动适应其它元素宽度的改变，这种
+                   就称为利用流体进行自动布局。
                   
-           鑫三无准则的一条： 无宽度， 不规定元素宽度，是元素使用流完成自动布局。
+           鑫三无准则的一条： 无宽度， 不规定元素宽度，元素使用流完成自动布局。
          
      c. BFC: 块级格式化上下文， 当添加特定属性后， 父类标签会成为块级格式化上下文
-        里面元素独立于外面元素， 不相互影响。
+        一块独立的渲染区域，里面元素独立于外面元素，不相互影响。
         I. 形成 BFC 的条件
            float： 不为 none
            position： 不为 relative 和 static
            overflow： auto/hidden/scroll
            display: table-cell、table-caption 和 inline-block 中的任何一个。
+           flex 布局
+           grid 布局
         
         II. BFC 与 流
            overflow： hidden； 即使得父级元素内部是块级格式化上下文，又完好的保留了流的特性。
@@ -61,16 +70,24 @@
        III. 利用 BFC 实现清除浮动、 实现取消相邻 margin 元素合并。
           清除合并：
                  <div class='bro1'></div>
-                 <div class='bro2'></div>
-                 .bro1{
+                 
+                 <div class ='clear'>
+                    <div class='bro2'></div>
+                 </div>
+                 
+                 .clear{
                       overflow:hidden;
                   }
+                  
           清除浮动引起的高度塌陷: float 会破坏内河，加入 BFC 将其包含其中，静止了它对外部的破坏。
               <div>
+              
                 <div class='clear'>
-                 <img src='xxx.jpg'>
+                  <img src='xxx.jpg'>
                 </div>
-                 <div>wo</div>
+                
+                 <div> wo </div>
+                 
                  .clear{
                     overflow:hidden;
                  }
@@ -119,8 +136,8 @@
     问题： 不依靠将一个元素声明为 position:absolut, 如何使得上下两个元素重叠
 
 4. 选择器优先级：
-     ！imporant                    10000
-     内联 <xx style= "">           01000
+     ！imporant                     10000
+     内联 <xx style= "">            01000
      id 选择器                      00100
      类选择器/:伪类选择器/属性选择器[]  00010
      元素选择器/::伪元素选择器         00001
@@ -148,12 +165,16 @@
       b. 内联级元素： 非替换元素是不可以设置 width/height 的。
       
       c. 块级元素 width:auto 的四种表现： 
+      
                I. fill-available: 充分利用可利用空间，块级元素标签默认的 width
                   设置属于该种特性。 width 默认为当前内河。
-              II. shink-to-fit: 紧包性， 元素的宽度由子元素决定。 float、inline-bolck、
+                  
+               II. shink-to-fit: 紧包性， 元素的宽度由子元素决定。 float、inline-bolck、
                   position:absolute
+                  
               III. 最小宽度
-              IV. 超出容器限制： 相当于 内联元素设置 white-space:nowrap;
+              
+               IV. 超出容器限制： 相当于 内联元素设置 white-space:nowrap;
 
       d. 内联元素的 padding / border 的top/bottom属性,是可操作的，只是与块级
          元素不同的是 padding-top 是往上扩张， 不影响元素位置， 只有加入背景色
@@ -169,13 +190,13 @@
         
      b. position:absoulte   破坏文档流     display:block;
      
-        I. 元素只设置 position:absolute , 此时元素的位置
-           由 position:static 时的位置决定， 被称作无依赖的绝对定位。
-           若只设置一个方向，另一个方向不设置，依然保留相对特性。
+        I. 元素只设置 position:absolute , 此时元素的位置由 position:static 时的位置决定， 被称作
+           无依赖的绝对定位, 若只设置上/左，另一个方向不设置，依然保留相对特性。  此时 left：50%
+           的值等于相对于初始块的父元素：padding+conntent 宽度的一半， 若子元素最近的父元素为非   
+           static,则 left：50% 相对于最近父元素的 padding+content, 子元素宽度等于其内容的宽度。
         
-        II. absolut 的流体特性： 元素宽度由父元素决定
-            当同时设置 left：0 right：0，此时元素宽度 = 父元素 padding box 宽度 + content box 宽
-            度。 此时修改父元素的 padding ，子元素也不会移动。
+        II. 当同时设置 left：0 right：0，此时元素宽度 = 父元素 padding box 宽度 + content box 宽
+            度。 即子定位元素宽度不再表现为紧包性即宽度等于内容的宽度， 而是继承父类的宽度。 
             
         III. 绝对定位元素设置 Height=100% 相当于最近的定位祖先元素， height:inherit, 是相当于纯粹的
             的祖先元素。
@@ -183,7 +204,7 @@
         IV. 绝对定位元素的 marigin：auto， 具备流体特性， 当两侧都为 marigin:auto, 会发生自动平分
             从而实现居中。 
            
-        V.  若父元素是 非static的绝对定位元素， 则 top/left 相当于父元素的 padding定位。
+        V.  若父元素是非static的绝对定位元素， 则 top/left 相当于父元素的 padding定位。
         
      c. position: relative
         I. 元素相当于父元素的 content box 定位。
@@ -195,8 +216,9 @@
         II. 元素移动后，原始位置依然保留, 并且不影响上下左右的元素
         
         III. 父元素为 position:relative 可以用于限定子元素 position:absolute
-        
-     
+    
+    d. Sticky    
+  
 ```
 
 ### CSS 重点
@@ -317,49 +339,222 @@
             
             d. transform-style: flat | preserve-3d
             
- 5. 实现旋转木马图
-   <div class='stage'>
-  <div class ='container'>
-    <img src="https://img.iplaysoft.com/wp-content/uploads/2019/free-images/free_stock_photo.jpg">
-    <img src='https://pic1.zhimg.com/v2-4bba972a094eb1bdc8cbbc55e2bd4ddf_1440w.jpg'>
-    <img src='https://img95.699pic.com/photo/50046/5562.jpg_wh300.jpg'>
-    <img src='https://pic3.zhimg.com/v2-3b4fc7e3a1195a081d0259246c38debc_1440w.jpg'>
-  </div>
-</div>
-img{
-  width: 158px;
-  height:100px;
-  position: absolute;
-}
+5. 水平垂直居中布局
 
-img:nth-child(1) { transform: rotateY(   0deg ) translateZ(84px); }
-img:nth-child(2) { transform: rotateY(  90deg ) translateZ(84px); }
-img:nth-child(3) { transform: rotateY(  -90deg )translateZ(84px); }
-img:nth-child(4) { transform: rotateY(  360deg )translateZ(84px); }
+    a.  Flex 布局： 在父类元素使用 justify-content：center； align-items: center;
+    
+    b. absolute + margin: 设置 top=left=right=bottom=0  margin：auto
+    
+    c. absolute + translate:  设置 top:50% left:50%  transform:translate(-50%)
+    
+    d. 多个块状元素水平居中：父元素： text-align: center  子元素： display:inline-box
+    
+    e. 居中元素是 inline 、 inline-block ： 
+                I. 父类元素是 table-cell text-align:center vertical-align:middle
+               
+    
+    
+            
+```
 
-.stage{
-  perspective: 600px;
-  margin: 0px 200px 0px;
-  position:relative;
+### 参考实现
+
+```
+1. 实现旋转木马图
+                  <div class='stage'>
+                   <div class ='container'>
+                    <img src="https://img.iplaysoft.com/wp-content/uploads/2019/free-images/free_stock_photo.jpg">
+                    <img src='https://pic1.zhimg.com/v2-4bba972a094eb1bdc8cbbc55e2bd4ddf_1440w.jpg'>
+                    <img src='https://img95.699pic.com/photo/50046/5562.jpg_wh300.jpg'>
+                    <img src='https://pic3.zhimg.com/v2-3b4fc7e3a1195a081d0259246c38debc_1440w.jpg'>
+                   </div>
+                  </div>
+
+                img{
+                  width:  158px;
+                  height: 100px;
+                  position: absolute;
+                  margin-left:50%;
+                  margin-right:50%;
+                }
+
+                img:nth-child(1) {transform: rotateY( 0deg ) translateZ(84px);} 
+                img:nth-child(2) { transform: rotateY( 90deg ) translateZ(84px); }
+                img:nth-child(3) { transform: rotateY(  -90deg )translateZ(84px); }
+                img:nth-child(4) { transform: rotateY(  360deg )translateZ(-84px); }
+
+                .stage{
+                  perspective: 600px;
+                  margin: 0px 200px 0px;
+                  position:relative;
+                }
+
+                .container{
+                  height: 150px;
+                  transform-style: preserve-3d;
+                  position:relative;
+                  top:5px;
+                  animation: 10s linear 0s infinite  rotate; 
+                }
+
+                .stage{
+                  perspective:600px;
+                }
+
+                @keyframes rotate{
+                   from {
+                      transform: rotateY(0);
+                  }
+                  to {
+                      transform: rotateY(360deg);
+                  }
+                }
+```
+
+### CSS 问答
+
+```
+1. css 的盒子模型： css 通过盒模型操作 HTML 元素， 每个盒模型一共有4个属性：margin、border、padding
+                  content， 每个属性都包含了4个方向。 一共有两种盒模型： w3c 盒模型 和 IE 盒模型
+                  这两种盒子最大的区别是： content ， IE 盒模型的 content 是 border+padding+
+                  内容。 可以通过 box-sizing： 改变 content 的范围。
+                  
+2、 link 和 @important :  区别
+    a. 二者都是加载 css 文件， link 是 html 标签 而 @important 是 css提供的
+    
+    b. link 是在页面加载时， 同时被加载； @important 是等页面加载完后再加载
+    
+    c. link 异步加载， 会继续往下解析 HTML 文件
+    
+3. 块级元素和内联级元素
+
+     a. 空间上： 块级元素占用一行，相邻块级元素需要换行；内联级元素是不换行，相邻内联元素紧挨着拜放
+     
+     b. content: 块级元素 width 继承父级元素的 width 高度初始化为 0 . 内联级元素一般有自己的宽高
+     
+     c. 设置内联级元素垂直方向的 margin 和 padding 再视觉上无变化，但是引入背景颜色 padding 可看出
+        padding 区域有变化。 发生的不是空间占用而是空间重叠。
+        
+     d. 内联元素之前都会生成一个空白的幽灵节点。
+     
+4. text-overflow 处理单行文字溢出：针对块级元素溢出内容， 溢出方向必须是内联方向(稽水平)
+           text-overflow: clip   (默认值)   ： 极限出截断文本
+                          ellipsis: 省略号
+                          fade
+           需要配合： white-space：nowrap
+                     overflow:hidden 
+   多行文字溢出：
+               .box {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;        // 显示 3 行就会发生溢出
+                -webkit-box-orient: vertical;
+            }
+
+5. 实现三栏布局：
+        a. float + margin
+        
+        b. float + BFC
+        
+        c. position: absolute
+        
+        d. flex 实现
   
-}
-.container{
-  width: 500px;
-  height:400px;
-  transform-style:preserve-3d;
-  position:absolute;
-  top:50px;
-  animation: 4s linear 0s infinite noraml rotate; 
-}
+  a. float + BFC : 内容是图片和文字    text-align：center 使得 inline 元素内容居中  
+      .left{
+          float:left;
+          margin-left:50px;
+          width:150px;
+          text-align:center;
+        }
+        .right{
+          float:right;
+          text-align:center;
+          margin-right:50px;
+        }
+        .center{
+          overflow:hidden;
+          text-align:center;
+        }
+    右对齐元素必须放在第二个位置上， 使得 center 可以被夹在中间， 否则 center 会占据剩余空间使得
+    float:right 元素跑在第二行。 中间元素自适应两边的列宽度扩展。
+    
+ b. flex:
+                .left{
+                  flex:1;
+                  text-align: center;
+                }
 
-@keyframes rotate{
-  from{
-      transform: rotateY(0);
-  }
-  to{
-      transform: rotateY(360deg);
-  }
-}
-https://www.zhangxinxu.com/wordpress/2012/09/css3-3d-transform-perspective-animate-transition/?shrink=1
+                .center{
+                  flex:1;
+                  text-align: center;
+
+                }
+                .right{
+                  flex:1;
+                  text-align: center;
+                }
+                
+c. position : 父元素设置 relative  子元素设置 position：absolute 需要计算好间距
+                .left{
+                  position:absolute;
+                  text-align: center;
+                }
+
+                .center{
+                  position:absolute;
+                  text-align: center;
+                  left:0;             // 中间格式化宽度 text-align：完成居中
+                  right:0;
+
+                }
+                .right{
+                  position:absolute;
+                  text-align: center;
+                  right:5px;
+                }
+
+                .container{
+                    position:relative;
+
+                }
+6. table 和 display：table 的区别：
+
+   a. table 需要等页面完全加载完才可以显示出来， 使用 div + css 是一行行加载
+   
+   b. css 生成的 table 比 html 生成的 table 小
+   
+  c.  table 嵌套性太多， 用 css + div 更加简洁。
+  
+  d.  display: table 父元素、  
+      display:table-row : 表格行  
+      display:table-cell 表格单元  
+      
+7. color： 设置元素的文本颜色，同时包括边框(除非被 border-color 覆盖)
+   background-color： 设置元素的 padding+contnet+border 区域的背景颜色
+   
+8： 实现一个旋转硬币 ： 旋转部分是走马灯的弱化版 对硬笔图像的容器定义 transform-style 和 animation
+
+     background-image: url('')    属性用于为一个元素设置一个或者多个背景图像
+     绘制的原则：图像以 z 方向堆叠的方式进行。先指定的图像会在之后指定的图像上面绘制。因此指定的第一个图像“最接近用户”
+     
+9. 绘制正方形：  核心 css
+   .front{
+    transform:translateZ(1em);                    正面是图片往前拉
+    }
+    .bottom{
+    transform:rotateX(-90deg) translateZ(1em);    底面：推导
+    }
+    .top{
+    transform:rotateX(90deg) translateZ(1em);     上面：往上翻
+    }
+    .left{
+    transform:rotateY(-90deg) translateZ(1em); 
+    }
+    .right{
+    transform:rotateY(90deg) translateZ(1em);     
+    }
+    .back{
+    transform:translateZ(-1em);
+    }
 ```
 
