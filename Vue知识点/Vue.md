@@ -16,9 +16,7 @@
    on a Vue instance.
         data 、 computed、 wacther、 v-bind、 v-model
 8. Component Registration
-9. Vue-x 命令直接作用于Html标签，影响Html标签属性，和操作 Html 标签本身。
-
-
+9. Vue-x 命令直接作用于 Html 标签，影响 Html 标签属性，和操作 Html 标签本身。
 ```
 
 
@@ -52,7 +50,7 @@ v-xx： [directive] They are special attributes provided by Vue
 <h1 v-if="awesome">Vue is awesome!</h1>
 <h1 v-else>Oh no 😢</h1>     只有一个分支会被渲染
 
-v-if vs v-for
+v-if vs v-show
   v-if has higher toggle costs while v-show has higher initial render costs. So prefer v-show if you need to toggle something very often, and prefer v-if if the condition is unlikely to change at runtime.
    (v-show有较高的初始渲染消耗， 而当我门选择的比较平凡时 v-if 消耗的比较高)
 
@@ -242,7 +240,7 @@ Options:
             vm.$el === document.getElementById('example');
 
  3. computed:
-       解决 {{value}}, value是表达式时语义不够简约直观。其上存放函数但在挂载区又可以直接
+       解决 {{value}}, value 是表达式时语义不够简约直观。其上存放函数但在挂载区又可以直接
     以函数名的方式直接调用。 计算结果会存储在缓冲区，任何地方调用可以直接从缓冲区拿到结果。
        注： the computed properties are cached based on their reactive dependencies. 这句话指的是computed 有使用到 data中的属性 message 时， message 发生改变，computed 也会发生改变。 因为 message 是它的 reactive dependencies， Vue 可以检测到 message 的改变， 因此computed 中也会跟着改变。
           var vm = new Vue({
@@ -416,7 +414,7 @@ Shorthands
 
 ### Data Driven
 
-```
+```javascript
 数据驱动： 以往进行视图层上的数据修改时，不仅考虑修改的数据逻辑， 同时关注如何操纵DOM，我理解
          的数据驱动核心关注：[数据的改变对视图层的影响]，而不需要考虑如何操作 DOM 达成这一行为。 
          DOM 操作已经被框架定义在内部， 采取统一的 DOM 渲染流程。例如，使用 vUE 我们关注
@@ -442,8 +440,8 @@ Shorthands
                           initProvide(vm)              
                           callHook(vm, 'created')     //  生命周期 created
                           
-  initstate(Vm) 是执行数据响应化的关键性操作，其内部分别初始化： 
-                props、 Methods、 Data、 Computed、 Watche   (顺序从左至右)
+  initState(Vm) 是执行数据响应化的关键性操作，其内部分别初始化： 
+                props、 Methods、 Data、 Computed、 Watcher    (顺序从左至右)
           
            1. 创建顺序从左到右，避免在这四个对象中定义相同的变量名，他们内部会从
                vm.$options.xx 获取已经创建的对象来识别是否有相同变量名。
@@ -480,10 +478,12 @@ Shorthands
                  callHook(vm, 'beforeMount');
                  vm._update(vm._render(), hydrating);
                  callHook(vm, 'Mount');
+                 
  1. 在 beforeMount 进行完后：
           会进行模板渲染成 vndoe 通过 vm._render()
           vm._update(vnode, hydrating) 会在其内部调用 __patch__() 方法    ： diff
           此时 DOM 生成并且挂载到了 vm.$el 中。
+          
  2. 在 DOM 生成并挂载完成后 vm._update(vm._render(), hydrating)后会返回 updateComponent
     其会被用于 new Watcher(vm, updateComponent, noop, {
                              before() {
@@ -512,6 +512,114 @@ Shorthands
 ```
 1. render函数  diff 算法 
 2. nextTick
+```
 
+```javascript
+VNODE: 
+  a.  vndoe 是 js 对象， 用 vndoe 去创建相应的 DOM 树。
+  
+  b.  利用 vndoe 记录状态， 当某一状态发生变化， 通过比较生成的新旧 vnode 对相应节点进行更新。
+  
+  c.  vue 中的 vnode 借鉴了 snabbdom 中的 dom
+      I. snabbdom: 
+             VNode{
+                 sel: 选择器
+                 data:
+                 text: 文本
+                 childen:
+                 elm: dom 元素 
+                 key: 键
+             }
+      II. vue： 元素类型、 文本类型、 注释类型、 组件类型、 克隆类型、 函数类型
+             VNode｛
+                 tag:
+                 data:
+                 children:
+                 text:
+                  elm:
+                  key:
+                  parent:
+                  ns:
+                  context:
+                  functionalContext:
+                  functionalOptions:
+                  functionalScopeId:
+                  ComponentOptions:
+                  ComponentInstance:
+                  isStatic:
+                  isInserted:
+                  isOnce:
+                  isComment:
+                  isCloned
+               ｝
+               
+   d. 元素节点介绍： 不需要的属性设置为 undefined/false
+           I.   注释节点： text、 isComment：true
+           
+           II.  文本节点： text
+           
+           III. 元素节点:  tag; 节点名称 
+                         data： 节点属性
+                         content:上下文， 当前组件的 Vue.js实例
+                         children
+           
+            IV： 克隆节点： 用于优化静态节点和插槽节点
+                   . 静态节点在新的 newVNode 不需要创建直接克隆
+                   
+             V. 组件式节点： 与元素节点相似， 拥有两个独有属性
+                   . componentOptions： 组件节点的选项参数
+                   . componentInstance: 组件实例 vue.js 实例
+                   
+             VI. 函数式节点： 与元素节点相似， 拥有两个独有的属性
+                    . functionalOptions:{..}
+                    . functionalContext:{..}
+```
+
+
+
+```javascript
+diff 算法：
+   a. 核心理念： 在修改 DOM 树时往往是对该节点的内容进行修改，因此采用同层比较差异，减少比较次数。
+   
+   b. 四个索引指针： oldVNodeStart/oldVNodeEnd  newNodeStart/newVNodeEnd
+             意义： 指向当前未处理的节点
+   
+   c. isSameNode(old, new): 比较旧的 VN 和 新的 VN 是否相同
+        I. 比较方式： 比较二者的选择器 sel 和 键 key 是否相同
+        
+       
+        II. function sameVnode(vnode1: VNode, vnode2: VNode): boolean {
+              const isSameKey = vnode1.key === vnode2.key;
+              const isSameIs = vnode1.data?.is === vnode2.data?.is;
+              const isSameSel = vnode1.sel === vnode2.sel;
+
+              return isSameSel && isSameKey && isSameIs;
+             }
+      
+   d. if(isSameNode(oldVNode[oldVNodeStart],newVNode[newVNodeStart]){
+          // 更新内容
+          oldVNodeStart++;
+          newVNodeStart++;
+      }else if(isSameNode(oldVNode[oldVNodeEnd],newVNode[newVNodeEnd]){
+          // 更新内容
+          oldVNodeStart--;
+          newVNodeEnd--;
+      }else if(isSameNode(oldVNode[oldVNodeStart],newVNode[newVNodeEnd]){
+          // 更新内容， 旧节点移动到最右边已经未处理节点之后
+           oldVNodeStart++;
+           newVNodeEnd--;
+      }else if(isSameNode(oldVNode[oldVNodeEnd],newVNode[newVNodeStart]){
+          // 更新内容， 旧节点移动到最左边未处理节点之前
+           oldVNodeStart--;
+           newVNodeEnd++;
+      }else{
+           
+           
+           newVNodeStart++;
+      }
+      
+      II. (oldVNodeStart > oldVNodeEnd) || (newVNodeStart > newVNodeEnd)循环截止
+           若 oldVNode 有剩余则是无用节点进行 [删除节点] 操作
+           若 newVNode 有剩余则是新增节点进行 [新增节点] 操作
 ```
 
