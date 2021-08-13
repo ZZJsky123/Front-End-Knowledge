@@ -10,6 +10,9 @@ apply(thisarg, [argments])
 
 
 ```javascript
+1. 在 context 下设置 context.fn
+2. 获取函数参数， 识别函数参数是否是数组
+
 Function.prototype.myapply = function(context){
     let context = context || window;
     context.fn = this
@@ -28,6 +31,9 @@ Function.prototype.myapply = function(context){
 ## call
 
 ```javascript
+1. 在 context 下设置 context.fn
+2. 获取函数参数， 识别函数参数是否是数组
+
 Function.prototype.mycall = function (context){
     let context = context || window;
     context.fn = this;
@@ -36,7 +42,6 @@ Function.prototype.mycall = function (context){
     delete context.fn;
     console.log([...arguments])
 }
-
 ```
 
 
@@ -61,13 +66,14 @@ Function.prototype.mybind = function(context, ...args1){
     let context  = context;
     
     function res(...args2){
-        if (this instanceof _this){
+        if (this instanceof _this){     // 
             _this.call(this, ...args1,...args2);
         }else{
             _this.call(context, ...args1,...args2) 
         }
     }
-      function foo() {};
+    
+    function foo() {};
       if(_this.prototype) {
           foo.prototype = _this.prototype;
       }
