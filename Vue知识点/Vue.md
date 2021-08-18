@@ -16,7 +16,9 @@
    on a Vue instance.
         data 、 computed、 wacther、 v-bind、 v-model
 8. Component Registration
-9. Vue-x 命令直接作用于 Html 标签，影响 Html 标签属性，和操作 Html 标签本身。
+9. Vue-x 命令直接作用于Html标签，影响Html标签属性，和操作 Html 标签本身。
+
+
 ```
 
 
@@ -50,9 +52,9 @@ v-xx： [directive] They are special attributes provided by Vue
 <h1 v-if="awesome">Vue is awesome!</h1>
 <h1 v-else>Oh no 😢</h1>     只有一个分支会被渲染
 
-v-if vs v-show
+v-if vs v-for
   v-if has higher toggle costs while v-show has higher initial render costs. So prefer v-show if you need to toggle something very often, and prefer v-if if the condition is unlikely to change at runtime.
-   (v-show有较高的初始渲染消耗， 而当我门选择的比较平凡时 v-if 消耗的比较高)
+   (v-show有较高的初始渲染消耗， 而当我门选择的比较频繁时 v-if 消耗的比较高)
 
 v-if with  v-for
 v-for has a higher priority than v-if
@@ -137,6 +139,12 @@ v-for has a higher priority than v-if
     <ul>
       <li v-for="i in list" v-once>{{i}}</li>
     </ul>
+    
+12. v-model 实现双向数据绑定
+    a. 修饰符： .lazy
+               .number:  将用户输入转换为 数字
+               .trim  :  自动去除首尾的空白字符
+             
 ```
 
 ### Class & Style binding
@@ -240,7 +248,7 @@ Options:
             vm.$el === document.getElementById('example');
 
  3. computed:
-       解决 {{value}}, value 是表达式时语义不够简约直观。其上存放函数但在挂载区又可以直接
+       解决 {{value}}, value是表达式时语义不够简约直观。其上存放函数但在挂载区又可以直接
     以函数名的方式直接调用。 计算结果会存储在缓冲区，任何地方调用可以直接从缓冲区拿到结果。
        注： the computed properties are cached based on their reactive dependencies. 这句话指的是computed 有使用到 data中的属性 message 时， message 发生改变，computed 也会发生改变。 因为 message 是它的 reactive dependencies， Vue 可以检测到 message 的改变， 因此computed 中也会跟着改变。
           var vm = new Vue({
@@ -415,12 +423,12 @@ Shorthands
 ### Data Driven
 
 ```javascript
-数据驱动： 以往进行视图层上的数据修改时，不仅考虑修改的数据逻辑， 同时关注如何操纵DOM，我理解
+数据驱动： 以往进行视图层上的数据修改时，不仅考虑数据显示逻辑， 同时关注如何操纵DOM，我理解
          的数据驱动核心关注：[数据的改变对视图层的影响]，而不需要考虑如何操作 DOM 达成这一行为。 
-         DOM 操作已经被框架定义在内部， 采取统一的 DOM 渲染流程。例如，使用 vUE 我们关注
+         DOM 操作已经被框架定义在内部， 采取统一的 DOM 操作流程。例如，使用 vUE 我们关注
          组件的 data computed methods的属性，子组件的Props被送进去什么数据，他们发生改变时会
          在视图层反映。 因此数据驱动根本上是让我们在构建 [复杂的视图交互] 时关注视图显示的逻辑， 
-         而不需要关心最后的渲染操作。
+         而不需要关心最后的渲染。
                            背景 -- 思想 -- 例子  -- 提升
                            
    (Tip: 数据驱动类似于将原先的应用题变成了填空题， 使用者只关心填什么答案，而不关心如何得到
@@ -429,7 +437,7 @@ Shorthands
 响应式： 当前主流的框架是响应式的， 响应指的是状态发生变化后，视图层会自动更新。 VUE 采用双向绑定
         的策略， 逻辑层会影响到视图层， 视图层会影响到逻辑层。 VUE 完成响应式的方案是采用： 
                        1. 数据响应化  2. 依赖收集  3. 消息派发
-   每个Vue都有个 _uid
+每个Vue都有个 _uid
  1.new Vue --> 2. 执行Vue._init()函数 ---> 3. 在 _init() 函数中执行一系列初始化操作
                           initLifecycle(vm)
                           initEvents(vm)
@@ -440,20 +448,28 @@ Shorthands
                           initProvide(vm)              
                           callHook(vm, 'created')     //  生命周期 created
                           
-  initState(Vm) 是执行数据响应化的关键性操作，其内部分别初始化： 
-                props、 Methods、 Data、 Computed、 Watcher    (顺序从左至右)
+  initstate(Vm) 是执行数据响应化的关键性操作，其内部分别初始化： 
+                props、 Methods、 Data、 Computed、 Watcher   (顺序从左至右)
           
            1. 创建顺序从左到右，避免在这四个对象中定义相同的变量名，他们内部会从
                vm.$options.xx 获取已经创建的对象来识别是否有相同变量名。
+               
            2. props 调用 defineReactive 函数在一个for循环中对其属性进行响应化
               使用 Proxy(vm, '_props', key) 将_props 的属性让 Vm 代理。
               这里 VUE 将 initprops(vm, opts.props) 定义了props = vm._props = {}
-              最后调用 definictive(props, key, value);
+              最后调用 defineReactive(props, key, value);
+              
            3. Data 调用 observer(data, true/*asRoot*/);
-              使用 Proxy(vm, '_data', key) 将_data 的属性让 Vm 代理。
-           4. watch 是一个对象， 键是需要监听的表达式，值是变化时调用的回调函数、Methods定义的
+              使用 Proxy(vm, '_data', key) 将_data 的属性让 Vm 代理。如果 data 的属性和Props
+              Methods 没有重复的话，有重复不发生代理。
+              
+           4. method的方法将直接加到Vm上， 如果与 props 发生重复会发出警告。
+           
+           5. watch 是一个对象， 键是需要监听的表达式，值是变化时调用的回调函数、Methods定义的
               方法名， {function(){}, deep:true}, {function(){}, immediate:true}(建立侦听后立即调用)，  watch 可以定义与 data 相同属性名， 从而为 data 上的属性增添新的监听回调函数。
+              
            5. computed 是计算属性， 具有缓存的作用。 其最大作用是将其键当作某个值在模板中直接使用。
+              不会进行响应化。
            
  数据响应化的核心是 definictive(obj, key ,val)：
      1. 函数内部会首先获得 obj 的 prototype 若其不是对象则直接返回。 
@@ -478,12 +494,10 @@ Shorthands
                  callHook(vm, 'beforeMount');
                  vm._update(vm._render(), hydrating);
                  callHook(vm, 'Mount');
-                 
  1. 在 beforeMount 进行完后：
           会进行模板渲染成 vndoe 通过 vm._render()
           vm._update(vnode, hydrating) 会在其内部调用 __patch__() 方法    ： diff
           此时 DOM 生成并且挂载到了 vm.$el 中。
-          
  2. 在 DOM 生成并挂载完成后 vm._update(vm._render(), hydrating)后会返回 updateComponent
     其会被用于 new Watcher(vm, updateComponent, noop, {
                              before() {
@@ -507,12 +521,82 @@ Shorthands
                   
 ```
 
+```javascript
+双向数据绑定：数据层的改变影响视图层， 视图层的改变影响到数据层。
+
+双向数据绑定核心的逻辑： 1、数据响应化 2. 依赖收集  3. 消息派发
+
+在 created 钩子函数之前， 发生数据响应化， 核心函数是 defineReactive 该函数会遍历 data 上的属性， 调用 Object.defineProperty(obj, pro, decriptor), 为每个属性添加 get:, set:。 get: 中用于进行依赖收集，依赖该属性对象会被收集到 sub 数组中。 set： 用于消息派发， 遍历属性上的 sub 数组通知每一个依赖项进行数据更新。
+
+依赖收集： 在 mount 阶段前， 新建 new watcher 对象， 内部会调用渲染函数，在生成虚拟节点的过程中发生数据访问，从而触发依赖收集， 数据上的 sub 数组会收集当前的 watcher.  生成虚拟节点后便调用内部的 patch 算法
+进行 DOM 更新和模板挂载。
+
+消息派发：监听视图层数据变化，数据变化后，会触发数据的 set 函数， 其会遍历数据上收集的 watcher 并调用他们上的 updata 算法进行视图更新。
+
+视图层的改变影响到数据层是通过监听视图层的改变来完成的， Vue 中实现双向绑定指令： v-model, 其只能作用于
+表单元素。 v-model 是语法糖： v-bind 和 v-on , v-bind 实现单向绑定， v-on 监听事件改变数据值， 触发
+set。
+
+第一次渲染+打补丁， 是发生在依赖收集后， 依赖收集完毕后此时也生成 vnode 节点， 调用 patch 算法进行视图更新。 在页面运行过程中， 数据更新带来的视图更新， 发生在 beforeUpdata 之后， Mount中。
+
+双向数据绑定最底层的思想： 双向代理， ES5 提供的 get 和 set只能是当前代理， 通过当前代理去访问绑定的元素
+                       通过 set 由数据层向视图层发送改变。  
+
+最小双向数据绑定单元：
+    <div id="app">
+        View: <input type="text" id="input"/>
+        <p id="data"></p>
+        <button id="msg" > ++data </button>
+    </div>
+    
+   <script>
+        let input = document.getElementById('input');
+        let btn  = document.getElementById('msg');
+
+        let obj = {};
+
+        Object.defineProperty(obj, 'num', {
+          configurable:true,
+          enumerable:false,
+
+          get(){
+             return input.value;
+          },
+          set(newValue){
+              input.value = newValue;                 // 对应 VUE 的渲染+打补丁
+              document.getElementById('data').innerHTML = 'data: '+ obj.num;
+          }
+        })
+        
+        // 数据层 ->  视图层
+        btn.addEventListener('click', function(e){
+            console.log('触发 button')
+            let val = obj.num;  
+            obj.num = ++val;
+
+        })
+
+        //   视图层 -> 数据层
+        input.addEventListener('keyup', function(e){
+
+             obj.num = input.value;
+
+        })
+    </script>
+   
+```
+
+
+
 ### 下一步问题：
 
 ```
 1. render函数  diff 算法 
 2. nextTick
+
 ```
+
+### Vndoe
 
 ```javascript
 VNODE: 
@@ -575,7 +659,7 @@ VNODE:
                     . functionalContext:{..}
 ```
 
-
+### diff
 
 ```javascript
 diff 算法：
@@ -613,7 +697,9 @@ diff 算法：
            oldVNodeStart--;
            newVNodeEnd++;
       }else{
-           
+           利用 newNodeStart 的索引值寻找对应的索引值 idxInold，该值表示 oldNode节点中
+           与 newNodeStart 是同一个节点的那个节点。判断是是否为相同节点，若不是新建 newNodeStart
+           插入到 oldNodeStart 之前； 若是则进行比较，对 old 节点进行相应操作并且移动到                        oldNodeStart 节点之前。
            
            newVNodeStart++;
       }
@@ -621,5 +707,72 @@ diff 算法：
       II. (oldVNodeStart > oldVNodeEnd) || (newVNodeStart > newVNodeEnd)循环截止
            若 oldVNode 有剩余则是无用节点进行 [删除节点] 操作
            若 newVNode 有剩余则是新增节点进行 [新增节点] 操作
+```
+
+### Vue Router 钩子
+
+```
+1. 标签
+    a. <vouter-link to="path">
+    
+    b. <router-view/>
+
+2. 钩子函数
+
+  a. 全局钩子
+     I. router.beforeEach((to, from, next) => {
+               // 执行逻辑
+               next('参数')       ：必须调用 next 函数   
+     }) : 发生跳转之前触发钩子函数
+     
+     next(): 进行管道中下一个钩子, 全部执行完，导航状态变为 confirmed
+     next(false): 中止， URL 会回答 from
+     next({path:'/'}) : 当前导航被中断，进行一个新的导航
+     
+     II. router.afterEach((to, from) => {})  : 不会改变导航本身
+     
+  b. 路由独享的钩子
+       let router = new VueRouter({
+            routes:[
+               {
+                 path:
+                 component:,
+                 beforeEnter: (to, from, next) => {}
+               }
+            ]
+       })
+
+  c. 组件钩子
+     let component = {
+         template:''
+         
+         beforeRouterEnter: (to, from , next) => {
+            // 在渲染该组件的路由被 confirm 前 ， 调用
+            // 不能获得组件的 this
+         }
+         
+         beforeRouterUpdate: (to, from, next) => {
+            // 路由发生改变，但是该组件被复用时调用, 可以获得组件的 this
+         }
+         
+         beforRouterLeave: (to, from, next) =>{
+             // 导航离开该组件时调用， 此时可以获得组件的 this
+         }
+     
+     }
+  
+ d. 完整的导航解析： 
+      导航被激活
+      失活的组件调用 beforeRouterLeave
+      调用全局钩子 beforeEach
+  if: 在重用的钩子里调用 beforeRouterUpdate
+      在路由配置里调用： beforeEnter
+      在激活的组件里调用： beforeRouterEnter
+      触发全局的 beforeResolve
+      导航被确认
+      调用全局的 afterEach
+      更新 DOM
+   
+   失活的组件钩子 -> 全局钩子 -> 复用组件钩子 -> 路由钩子 -> 激活的组件钩子 -> 导航确认 -> afterEach
 ```
 
