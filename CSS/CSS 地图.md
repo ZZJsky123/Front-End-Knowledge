@@ -217,7 +217,15 @@
         
         III. 父元素为 position:relative 可以用于限定子元素 position:absolute
     
-    d. Sticky    
+    d. Sticky ： relative + fix
+         I. 父级元素不能设置overflow:hidden， 否则粘滞效果消失。
+            父元素与子元素不能等高， 粘滞效果会消失
+         
+         II. 子元素设置 top，left，bottom，right 任一项便可生效， 当滑动到设置的位置自动发生粘滞
+             但是如果父元素完全滚出页面，则 sticky 元素也会跟着滚出。 如果只设置 left 则向上滚动依然
+             会滑出页面。
+             
+         III. 同一个父元素下的 sticky 元素会覆盖上一个 sticky 元素。
   
 ```
 
@@ -235,7 +243,7 @@
         I. flex-grow: 决定元素的扩张
              (1) 默认值 0； 即使有剩余空间也不压缩
              (2) 数值： x*a/(a+b+c)    x是剩余空间大小， a，b,c 是比例
-                 当元素宽度确定， 通过扩张padding 去扩宽元素宽度
+                 当元素宽度确定， 通过扩张 padding 去扩宽元素宽度
       
        II. flex-shink: 决定元素的收缩
              (1) flex 容器默认不换行， 当子元素宽度超过了父元素宽度， 该属性决定元素的收缩。
