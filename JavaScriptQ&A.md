@@ -876,7 +876,83 @@ JS 四种对象：
    c. 常见的宏任务： setTimeout()    setInterval()
    
    e. 执行流程：  主线程任务 -> 所有微任务 -> 从宏任务队列中读取一个宏任务。
+   
+7. get 和 set :  两种定义对象的方法
+
+   a. 在对象中定义 get 和 set
+      obj = {
+         _num: 1
+         
+         get num(){            // obj.num = 调用 get 函数， 其值为 get 返回的一个值
+            return this._num;
+         },
+         
+         set num(val){       //  obj.num = xx , xx 会作为 set 的参数而立即调用
+             this._num = val
+         }
+      }
+   b. Object.defineProperty(obj, xx, {
+      value:      值/函数
+      writable：
+      configurable:
+      enumerable:
+      
+      get:function(){}   定义 get 不能定义 value 和 writable， 访问属性时决定返回值
+      set:function(){}   定义 set 不能定义 value 和 writable， 为属性赋值时决定返回值
+       
+     //  set 和 get 可以不同时定义，将它们都理解成代理函数， get 是在获取值之前将值截取， 操作
+         后
+     //  set 定义的属性不能期望它是一个函数， 它只有在被赋值时才会触发
+     //  若属性是函数两种代理方法：  a. value 定义成函数   b. get 中返回一个函数
+     //  不能在 get 中触发 get 会无限次递归直到栈溢出。      
+   })
+   
+     如果使用 Object. defineProperty 定义某个属性的 get 和 set， 证明该属性是代理属性， 用于对某个
+   属性进行代理， 所有要不代理全局变量，要不代理局部对象。 get 属性中不能存在对当前属性的访问， set 不能
+   存在对当前属性的赋值。
+      
+      (function (){
+          let inner = 0;
+          
+          Object.defineProperty(obj, 'xx', {
+              get(){return inner};
+              set(val) inner = val;
+          })
+      })
+   
+   
 ```
+
+```javascript
+let arr2 = [1,2,3];
+let arrPro = Array.prototype;
+
+Object.defineProperty(arr2, 'push', {
+  configurable: true,
+  enumerable:false,
+    
+  value:function mutation(...val){
+     
+     console.log('before:', arr2);
+     let push = arrPro.push;
+     push.call(arr2, ...val);
+    
+     console.log('after:', arr2);
+   },
+    
+  get:function(){
+    return function(...val){
+     console.log('before:', arr2);
+     let push = arrPro.push;
+     push.call(arr2, ...val);
+    
+     console.log('after:', arr2);
+    }
+  },
+})
+```
+
+
 
 ## 重点
 
