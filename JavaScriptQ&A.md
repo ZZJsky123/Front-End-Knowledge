@@ -1410,24 +1410,51 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
 
 ```
 1. JS 几种类型值的内存图
+  a. 基本类型的值保持在栈中；复杂类型的值保持在堆中，通过栈中保存对应指针来获取堆中的值。
 
 2. 堆和栈的区别和联系
+  a. 在数据结构中栈存放数据的方式是先进后出， 堆是一个优先队列按照优先级进行排序。
+     在操作系统中，栈用于存放函数的参数值，局部变量，大小固定，[查询效率高]，其占用的内存由编译器自动分配释放。而堆区内存一般由
+     程序员自己分配和释放，或者交由垃圾内存回收机制。
 
 3. 内部属性[[class]]是什么
+   a. typeof 的结果是 object 的对象， 其都有一个内部属性 [[class]] 无法直接被访问，可以通过 
+      Object.prototype.toString.call(obj) 访问。 内部[[class]] 的值一般和它原生的内建构
+      造函数相对应。  null 和 undefined 不是对象
 
 4. JS 的内置对象
+   a. 在 ES5 标准中，一共定义了四种对象： built-in object、 native object、 host object、 user object
+      built-in object 是独立于环境，运行时自动初始化，我们称为全局对象，它有以下几个属性：
+      值属性： null， undefined， infinite， nan
+      函数属性： isNaN， eval， parseFloat， parseInt()
+      构造器属性： Function， Data， Number 所有的 native object 
 
 19  闭包怎么实现的
+    js 的作用域链：js 以函数作为基本的执行单元， 执行函数时，会创建词法环境，词法环境有两个属性： ER用于记录函数内部的
+                 的变量， outter： 用于记录所在执行上下文的词法环境，其值就是内部属性[[scope]] 的值，正在执行函数中
+                 的内部变量对象称为 AO， 其作用域链上的对象称为 VO， 作用域链： A0 + scope chain， 即AO+VO
+    闭包的实质是内部函数引用与它外部函数上的变量或者函数时，会创建一个闭包，闭包函数对象包含一条作用域链，当它被返回且被外部变量
+    对象接受，只有外部作用域不退出， 这条作用域链就不会被垃圾清除。
 
 5. null 和 undefined 的区别  (基础)
+   a. null: 基本数据类型，其值的意义是一个空对象
+   b. undefined： 基本数据类型，其值的意义代表变量未定义， undefined 不是保留关键字，可以用作变量名
+   c. null == undefined 为 true
 
 6. undefined 和 undeclared 的区别
 
 7 如何获取安全的 undefined 值
+  a. void 0 来获取安全的 undefined， 保证 undefined 不是一个变量名
 
 8. js 整数的安全范围是多少
+   a. 安全范围值
+      上限： Number.MAX_SAFE_INTEGER
+      下限： Number.MIN_SAFE_INTEGER
+   b. 超过安全范围，会返回 Infinite， 可以用 isFinite 进行检验
 
 9. isNaN 和 Number.isNaN 函数的区别
+   a. isNaN 接受参数后会将这个参数转换为数字， 任何不能转为数字的的值都会返回 true
+   b. Number.isNaN, 接受参数后会判断这个是否是数字，是的话再判断是否为 NAN， 更加准确。
 --------------------------------------------------------------------------
 22 Ajax 解决浏览器缓存问题 (题号：57)
 
