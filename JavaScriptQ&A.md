@@ -684,6 +684,7 @@ JS 四种对象：
            逻辑运算: 所有类型转 Boolean  
                    ： undefined、NaN、0、‘’、null、false
                    ： ｛｝[]  都为 true
+           双重非运算符：  ！！arg    显示的将 arg 转化为 boolean ，true-->true  false -->false
             
             ==  ： null/undefined/NaN  primitive value 之间   primitive value 与 引用
                  1. NaN == NaN  false
@@ -705,6 +706,16 @@ JS 四种对象：
     Array:    []            true       0        ""
             ["123"]         true       123      "123"
             ["abc"]         true       NaN      "abc"
+            
+   其他类型转为字符串：  null, undefined  --->  'null' 'undefined'
+                     Boolean --->  'true/false'
+                     Number ---->  'number'; 超出范围会用指数的方式
+                     Object ---->  除非自行定义toString, 否则调用 Obejct.prototype.toString.call()
+   其他类型转为数字：   undefined ---> NaN
+                     null --->  0
+                     Boolean --->  0/1
+                     String   ---->   NaN/Number
+                     Object 先转为相应的基本类型值，再按照上述规则
             
  总结： 基本数据类型都具备 valueOf()方法 、 toString()方法。 valueOf方法返回 primitive 值
        主要是在使用这些对象时方便获取基本值。 然后所有对象都拥有转换为字符串的方法。
@@ -1077,8 +1088,9 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
    f. 使用 Promise 注意：
        a. exuctor 中的 resolve 函数 如果接受到是一个 Promise 对象， 会等 Promise 对象决策
           完成后再触发 then 函数。
+   g. catch 后的 then 依然会触发， 如果错误在 then 中处理了， 则不会再触发 catch
    
-   g. Promise.prototype.Method:
+   l. Promise.prototype.Method:
           I. Promise.prototype.all: 函数输入一个 Promise Iterator， 返回一个 Promise ，Promise
                                     的值是一个数组(记录所有 Promise 的值)或者是一个 err 信息
                  
@@ -1262,9 +1274,10 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
         
      c. 内置执行器， 不需要人为调用 next 执行， Async 会和普通方法一样，用一行执行。
      
-     d. 返回一个 Promise， 其详细状态未知
+     d. 返回一个 Promise， 其详细状态未知, 若函数有返回值则，Promise的返回值是函数的返回值
      
      e. 返回的 Promise 需要等内部 await 后的所有 Promise 状态改变才会发生状态改变。
+        即使 await 后不是异步事件，也会阻塞后面的代码运行。
      
      f. async 的 return 返回的值，会作为返回的 Promise 值，传入到 then 的回调函数中。
      
@@ -1457,55 +1470,136 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
    b. Number.isNaN, 接受参数后会判断这个是否是数字，是的话再判断是否为 NAN， 更加准确。
 --------------------------------------------------------------------------
 22 Ajax 解决浏览器缓存问题 (题号：57)
+   若请求资源时不希望读取缓存：
+   ajaxObj.setRequestHeader('if-modified-since','0');
+   ajaxObj.setRequestHeader('Cache-control', 'no-cache');    // 浏览器不会再读缓存
 
 10. {} 和 [] 的 valueof 和 toString 的结果
     {}   valueof: {}    toString: [object object]
     []            []                 ""
 
 11. 假值对象
+    a. 对象值不为 null 做 boolean 判断返回 false ， 例如 document.all 返回一个类数组对象，存储页面所有的值。
 
 12. parseInt、parseFloat、 Number() 的区别
+   a. 
     parseInt、parseFloat 称为解析字符串
     Number 称为强制转换
+   b.
+     Number 转换为数字时：丢弃前导0 过滤字符串的前后空白字符， 若字符串不是纯数字返回 NaN， ''返回0
+     parseInt(数字， 进制):  若第一个非空字符不是数字，会返回 NaN。 前导0会被作为8进制解析， 小数会只保留整数
+     parseFloat(小数): 同上，没有进制转换，只有10进制，因此会忽略前导0。
+    
 18  ['1', '2', '3'].map(parseInt)返回什么
-    答案： [1, nan,nan]
+    答案： [1, NaN,NaN]  因为 parseInt 接收两个参数(arg, 进制)
+    因此运行过程 parseInt('1', 0)
+               parseInt('2', 1)  NaN
+               parseInt('3', 2)  NaN
+    map 内部定义的函数接受三个参数: value index arr ， 它会将这三个参数全部送入到 parseInt 中
+    parseInt 只会使用前两个数值。
     
 15. javascript 创建对象的几种方式  (题号：34)
 
 17 三种事件模型， 如何阻止冒泡(题号：42/43)
+       事件： 用户与页面发生交互
+    事件代理： 目标元素发生事件后，将事件向上传播，上交给父元素，在父元素处做统一的处理。
+             事件代理出现的背景是我们在业务中涉及到对大量元素绑定函数，事件代理可以降低内存消耗   
+    三种事件模型： 
+               a. 在目标元素上监听事件，无事件冒泡
+               b. IE 事件模型， 事件处理阶段 + 事件冒泡阶段
+               c. DOM LEVE2 事件捕获 + 事件处理阶段 + 事件冒泡阶段 (冒泡阶段是将事件送入到父元素，兄弟元素不会在冒泡阶段触发
+                                                              相同事件)
+    事件监听函数： ele.addEventListener('eventName', cb, true/false)  true: 在事件捕获时处理
+                      1.  可以定义多个同类型事件不同的回调函数，依次执行。
+                      2.  在一个节点上可以定义不同类型事件的回调函数。
+                      3.  event.stopPropagation() 阻止当前事件的向上或者向下冒泡或者捕获，当前事件回调依然会执行
+                      4.  event.stopImmediatePropagation() 阻止当前及之后同类型事件的冒泡或者捕获，并且该事件绑定的
+                                                           所有回调函数都不会被执行。
+    事件对象：  event.target event.currentTarge、event.type、 event.bubble、 event.phase
+              event.preventDefault();  事件发生的默认动作不会被执行，事件依然会向上传递
+                                       默认动作是浏览器自身定义的。
 ----------------------------------------------------------------------------
-16 写一个通用的事件侦听器函数 (题号：41 js代码)
+16 写一个通用的事件侦听器函数 (题号：41 js代码)  [完成]
 
 20  使用 use strict 的区别是啥  (题号： 47)
+     . use strict 是 ES5 添加的严格运行模式 
+     . 声明了 'use Strict' : 1. 变量不能重名， 2.this 不能绑定 window  3.禁止使用 with 语句
 
 21 对于 json 的理解  (js 悟道)
-
+   背景： 需要一种浏览器与服务器进行数据交换的方式
+         XML： 向服务器发送查询请求， 服务器返回 XML 文档，需要写一个 XML 文档查询的逻辑
+   为什么程序不能直接处理服务器返回的数据?
+         道格拉斯认为 [对象字面量] 是一个好的选择, 在 json 中属性和属性名采用单引号的方式
+         没有注释。
+    在 javascript 中 json 的操作方式：  JSON.parse(text, reviver)
+                                     JSON.stringify(value, replacer, space)
+         
 23 JS 模块加载器的实现  (题号：68)
-
+     
+  
 24 document.write 和 innerHtml 的区别  (题号: 70)
    DOM操作： 怎样添加、移除、移动、复制、创建、查找
    innerHTML 和 outerHTML 区别
    
 25 [,,,] 长度  (题号：77)
+   a. 数组的长度就是逗号的数量
 ------------------------------------------------------------------------------
 26. JS 中哪些操作会造成内存泄漏 (题号81)
+    内存泄露： 不用的内存没有得到及时的回收，称作内存泄露。
+    1. 意外的全局变量， 变量未声明就使用，会被加入到全局对象中；fun的this，在无上下文调用的情况下指向 window
+    2. 遗忘的计时器
+    3. DOM 引用
+    4. 闭包
+    垃圾回收机制： 创建一个root 列表， root列表存放全局变量引用。 在JS中root是window对象
+                检查它和它的全局子对象是否存在。
 
 31. Object.is() 与 原来的比较操作符 === 、== 的区别
+    Object.is(obj1, obj2) : 与 === 判断机制一样不会作类型转换，但是修正了 两个NaN 不相同， +0/-0相同问题
 
-28. 移动端的点击事件的有延迟吗，时间是对久，为什么会有，怎么解决？
+28. 移动端的点击事件的有延迟吗，时间是多久，为什么会有，怎么解决？
+    a. 有一个 300ms 的延迟， 因为移动端有双击缩放的效果。因此第一次点击后会等待 300ms 
+       在 300ms 内点击证明是双击。
+      解决方法： 在 meta 标签下禁用网页的缩放标签
+              <meta name="viewport" content="width=device-width,   适合各种屏幕分辨率
+                                     initial-scale=1.0,            初始化时不缩放
+                                     maximum-scale=1.0, 
+                                     user-scalable=no">            禁止缩放
+        在 PC 端响应点击事件： mousedown -> mouseup -> click
+         在移动端响应点击事件： touchstart --> touchend --> click,  touchend 会有 300ms 延迟
+                            300ms 之后触发 click。 
+                  点击穿透： 
 
 29 检测浏览器版本有哪些方式 (DOM 操作)
+   a. window.navigator.userAgent :  不可靠因为浏览器可以自己改写
+   b. 功能检测  浏览器特有的功能 window.attachEvent
 
-27 需求： 实现一个页面操作不会整夜刷新的网站，并且能在浏览器前进、后退时正确响应。 给出技术方案
+27 需求： 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应。 给出技术方案
+
+    
 ----------------------------------------------------------------------------------
 30.使用 JS 实现获取文件扩展名
+    function (fileName){
+       if( typeof fileName == 'string'){
+            let pos = fileName.indexOf('.');
+            return fileName.substring(pos+1);
+       }
+    }
 
 32. Unicode 和 UTF-8 之间的关系
-
-33. 为什么 0.1+0.2 !=0.3, 如何解决这个问题
+    Unicode 是一种字符集合，可以容纳100万个字符，解决各国为各自的文字制定字符集不统一的问题。
+             它为容纳的字符制定了编号，但是没有决定采用哪种编码方式
+    UTF-8 是 unicode 的编码方式， 利用开头的标志位实现变长编码，若是单字节则只用一个字节，因此
+          向下兼容 ASCII 。
                
 35 asyn 使用时有什么问题
+   a. await 会阻塞之后的的代码运行， 若之后的执行逻辑不依赖之前的代码会造成时间上的浪费
+   b. 解决方法： 同时使用多个 async 函数
+               可以并行的操作使用 await Promise.all()
+               不使用 await 而改用 Promise.then()
+        
 ----------------------------------------------------------------------------------
+33. 为什么 0.1+0.2 !=0.3, 如何解决这个问题
+
 37. 为什么使用 setTimeout 实现 setInterval 怎么模拟  (题号126)
 
 36 图片的懒加载和预先加载 (题号：123)
