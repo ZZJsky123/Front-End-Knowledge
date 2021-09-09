@@ -778,7 +778,10 @@ JS 四种对象：
                     .entries()              // 返回迭代器， value：[索引， 键值]
                     .keys()                 // 返回迭代器， value:key
                     .values()               // 返回迭代器， value：value
-                    .copywithin(target, start, end=this.length) // 复制元素到指定位置      
+                    .copywithin(target, start, end=this.length) // 复制元素到指定位置 
+                    .Array.from(类数组/可迭代对象， mapFn， this)  将一个类数组或者可迭代对象转化为数组，浅拷贝。
+                                                                mapFn是回调函数，输入值是数组成员：返回一个
+                                                                新值替代旧值，this 是mapFn时的对象
 ```
 
 ## 基础
@@ -874,8 +877,17 @@ JS 四种对象：
                                          
                                          })
               var obj = Object.create(null)  //  obj.__proto = null;
+              
         
-     
+6. 作用域： 执行当前函数会创建执行上下文， 并将当前函数压入到执行栈中， 开始执行时会调用  
+           NewDeclativeEnvironoment([[scope]])， 该函数会创建一个词法环境， 该词法环境有两个属性： ER 和 outter
+           outter 用于引用外部的作用域， 将传进的参数 [[scope]] 赋给 outter 使得当前作用域可以引用外部作用域。 
+          
+           该词法环境会被赋值给 作用域中 LexcialEnvironment 和 variableEnvironment， 在 ES5 中， 函数声明 和 变量声明
+           都记录在 variableEnvironment 中， 而 ES6 中 variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的
+           词法环境对外部作用域的引用，使得内部函数可以操作和使用外部函数的作用域和变量。
+           
+
 6. 宏任务 与 微任务
    
    a. 主线程执行完,会先访问微任务事件队列， 将微任务队列中的所有函数压入主线程中执行
@@ -984,10 +996,9 @@ Object.defineProperty(arr2, 'push', {
    Child.prototype.constructor = Child;
    let kid = new Child();
 
-2. 闭包原理： 执行当前函数会创建执行上下文， 并将当前函数压入到执行栈中， 开始执行时会调用NewDeclativeEnvironoment([[scope]])， 该函数会创建一个词法环境， 该词法环境有一个 属性用于指向
-外部的作用域， 该值是传进去的参数 [[scope]]。 该词法环境会被赋值给 作用域中 LexcialEnvironment 和
-variableEnvironment， 在 ES5 中， 函数声明 和 变量声明都记录在 variableEnvironment 中， 而ES6 中
-variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的词法环境对外部作用域的引用，使得内部函数可以操作和使用外部函数的作用域和变量。
+2. 闭包原理：  内部函数使用了外部函数的变量时会创建一个闭包作用域， 不管该函数有没有返回到外部。 当外部函数中
+             存在多个内部函数时，只要有一个内部函数使用外部变量都会创建一个闭包作用域。 外部函数执行完不被回收是
+             因为将闭包函数返回， 只要外部作用域不会被回收掉， 闭包变量可达因此会一直保留。
 
 4. 模块化：
       a. 模块化的核心： [量小]、[组织良好] 的代码比庞大的代码更具有理解性和可维护性，避免全局污染和提高
@@ -1256,7 +1267,7 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
              yield * iter1
              yield * iter2
          }
-         for(let val concat('str1', 'str2')){
+         for(let val of concat('str1', 'str2')){
              res.push(val);
          }
          res:['s','t','r','1','s', 't', 'r', '2']
@@ -1370,6 +1381,103 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
            A.__proto__ = Function.prototype      // A 是一个函数其原型是 Function.prototype
            A.prototype.__proto__ = Object.prototype;  
            注： Function.prototype 是一个函数。
+           
+9 模块化： 将 [复杂系统] 分解成多个模块方便编码， 模块化的职责：[避免全局变量污染]、[数据保护]、[相关联模块的依赖维护] 
+
+       a. // index.html
+            <script src="./mine.js"></script>
+            <script src="./a.js"></script>
+            <script src="./b.js"></script>
+            // mine.js
+            var name = 'morrain'
+            var age = 18
+
+            // a.js
+            var name = 'lilei'
+            var age = 15
+
+            // b.js
+            var name = 'hanmeimei'
+            var age = 13
+         最原始没有模块化， js 文件被引入到 html 网页中后，文件没有作用域， 三个文件中的变量都会存在于全局变量中
+         
+         开始使用命名空间解决不同文件变量名冲突的问题：
+         // index.html
+            <script src="./mine.js"></script>
+            <script src="./a.js"></script>
+            <script src="./b.js"></script>
+            // mine.js
+            app.mine = {}
+            app.mine.name = 'morrain'
+            app.mine.age = 18
+
+            // a.js
+            app.moduleA = {}
+            app.moduleA.name = 'lilei'
+            app.moduleA.age = 15
+
+            // b.js
+            app.moduleB = {}
+            app.moduleB.name = 'hanmeimei'
+            app.moduleB.age = 13
+         使用变量名空间，减少了变量名冲突，但是命名空间所有的属性都会暴露给使用者，导致有修改风险 (js 中没有私有变量)
+         
+         开始使用立即函数，通过闭包的方式的创建私有作用域
+         // index.html
+            <script src="./mine.js"></script>
+            <script src="./a.js"></script>
+            <script src="./b.js"></script>
+            // mine.js
+            app.mine = (function(){
+                var name = 'morrain'
+                var age = 18
+                return {
+                    getName: function(){
+                        return name
+                    }
+                }
+            })()
+
+            // a.js
+            app.moduleA = (function(){
+                var name = 'lilei'
+                var age = 15
+                return {
+                    getName: function(){
+                        return name
+                    }
+                }
+            })()
+
+            // b.js
+            app.moduleB = (function(){
+                var name = 'hanmeimei'
+                var age = 13
+                return {
+                    getName: function(){
+                        return name
+                    }
+                }
+            })()
+         不够优雅和完美，当项目变的逐渐大的时候，模块之间的依赖难以管理。
+          
+       a. jquery 库加载完毕后，它的 API 全放在了 window.$ 中，有命名空间冲突的危险
+          比如相同库也把自己的 API 放在 window.$ 中。
+       
+          
+       b. commonJS规范: 
+               a. 每一个文件是一个模块，有自己的[作用域], 文件里定义的变量、函数、类都是私有的对外不可见
+               b. 每一个模块都有两个变量可以用： require / module, require 用于导入模块， module 是
+                  当前模块对象，其上有一个属性 exports 我们将需要导出的变量、函数、类放在 exports 中
+               c. exports = module.exports, 相当于其别名， 主要不能直接将变量赋给 exports， 这样
+                  只会改变 exports 中的指向。 
+               d. 若模块对外导出只是一个单一的值， 直接对 module.exports = xxx 赋值
+               e. require 基本的执行方式是加载一个模块：[执行文件] 后返回这个模块的 exports 对象
+               f. require 的是被导出的值的拷贝。也就是说，一旦导出一个值，模块内部的变化就影响不到这个值 。
+                  require 是浅拷贝。
+               g. 加载的模块要具备缓存
+         ES6 module 和 CommonJS 的区别： commonJS 中的 require 是运行时才能够知道导出的内容
+                                       import 是 在编译时已经能够确定导出的内容，因此他有一个提升效果。
 ```
 
 ## 设计模式
@@ -1453,6 +1561,7 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
    a. null: 基本数据类型，其值的意义是一个空对象
    b. undefined： 基本数据类型，其值的意义代表变量未定义， undefined 不是保留关键字，可以用作变量名
    c. null == undefined 为 true
+   d. 变量值为 null 会被垃圾回收掉
 
 6. undefined 和 undeclared 的区别
 
@@ -1507,8 +1616,8 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
     三种事件模型： 
                a. 在目标元素上监听事件，无事件冒泡
                b. IE 事件模型， 事件处理阶段 + 事件冒泡阶段
-               c. DOM LEVE2 事件捕获 + 事件处理阶段 + 事件冒泡阶段 (冒泡阶段是将事件送入到父元素，兄弟元素不会在冒泡阶段触发
-                                                              相同事件)
+               c. DOM LEVE2 事件捕获 + 事件处理阶段 + 事件冒泡阶段 (冒泡阶段是将事件送入到父元素，兄弟元素不会在冒泡阶段触 
+                                                              发相同事件)
     事件监听函数： ele.addEventListener('eventName', cb, true/false)  true: 在事件捕获时处理
                       1.  可以定义多个同类型事件不同的回调函数，依次执行。
                       2.  在一个节点上可以定义不同类型事件的回调函数。
@@ -1572,10 +1681,6 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
 29 检测浏览器版本有哪些方式 (DOM 操作)
    a. window.navigator.userAgent :  不可靠因为浏览器可以自己改写
    b. 功能检测  浏览器特有的功能 window.attachEvent
-
-27 需求： 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应。 给出技术方案
-
-    
 ----------------------------------------------------------------------------------
 30.使用 JS 实现获取文件扩展名
     function (fileName){
@@ -1599,10 +1704,31 @@ variableEnvironment 只记录 var 变量。 闭包的核心是 内部函数的�
         
 ----------------------------------------------------------------------------------
 33. 为什么 0.1+0.2 !=0.3, 如何解决这个问题
-
+    浮点类型：IEEE 754
+    十进制转化为二进制： 整数部分除以二，取余数， 留尚继续除以2， 直到商为1
+                     小数部分不断乘以2，取整数位，留小数位继续乘以2 直到为0
+                  9.0 --->  1001.0   ---> 指数表示 1.001*2^3
+    浮点数表示方式： 32 位：  符号位1  8位指数位   23位有效数字
+                  64 位：  符合位1  11位指数位  52位有效数字
+            8位指数位：  0-255 因为需要表示指数，因此将 0-127 表示成指数， 127-255 表示成正数
+                       因此指数位的值 -127 是真实的十进制的值， 表示的范围 -127 - 127
+            11位指数位： 0-2048 因为需要表示指数，因此将 0-1023 表示成负指数，1023-2048 表示成正指数
+                       因此指数位的值 -1027 是真实的十进制的值
+            有效数字为小数部分，其正数部分默认是1， 即1.xxxx
+            当指数位全为0，则整数部分默认是0。
+            当指数位全为1，有效数字部分全是0，则数字默认为1，表示无穷大； 有效部分不全为0， 表示为 NaN
+                
+    0.1 、0.2 在十进制转为二进制时，由于是无限循环因此有摄入误差。 在相加时由于需要阶数统一
+    记住： 永远不要比较两个浮点的大小 0.1 + 0.2 === 0.3
+   
 37. 为什么使用 setTimeout 实现 setInterval 怎么模拟  (题号126)
 
+
 36 图片的懒加载和预先加载 (题号：123)
+
+
+27 需求： 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应。 给出技术方案
+
 
 34. WEB 安全知识：1. 什么是 xss 如何防范， 2. 什么是 csp 3， 什么是 CSRF 攻击如何防范 CSRF攻击
                  4. 什么是点击劫持，如何防范点击劫持 5 什么是 SQL注入攻击 (102-106)
